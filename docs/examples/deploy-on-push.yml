@@ -1,0 +1,21 @@
+# Deploy to WordPress via Webba Deploy push-to-deploy URL.
+#
+# 1. In WordPress: Webba Deploy → Push-to-deploy — copy your site secret.
+# 2. In WordPress: Webba Deploy → Dashboard — copy the push URL for your package.
+# 3. Add repository secret WEBBA_DEPLOY_URL with the full URL (includes secret).
+#
+# Example URL shape:
+#   https://yoursite.com/wp-json/webba-deploy/v1/deploy?secret=...&package=my-plugin&type=plugin
+
+name: Deploy to WordPress
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Webba Deploy
+        run: curl -fsS -X POST "${{ secrets.WEBBA_DEPLOY_URL }}"

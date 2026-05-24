@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ruleset name="Webba Deploy">
+	<description>WordPress Coding Standards for Webba Deploy</description>
+
+	<file>webba-deploy.php</file>
+	<file>uninstall.php</file>
+	<file>includes</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+
+	<rule ref="WordPress.Security"/>
+	<rule ref="WordPress.DB"/>
+
+	<config name="minimum_supported_wp_version" value="6.0"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<arg value="sp"/>
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+</ruleset>

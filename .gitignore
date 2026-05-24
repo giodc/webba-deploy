@@ -1,0 +1,7 @@
+/vendor/
+composer.lock
+webba-deploy-config.php
+.idea/
+.vscode/
+*.log
+.DS_Store
