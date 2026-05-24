@@ -67,7 +67,7 @@ Webhooks are **not** required for deploy (optional for future auto-deploy).
 
 | Issue | Fix |
 |-------|-----|
-| Manifest error `"url" wasn't supplied` | Site URL is empty, localhost, or HTTP. Use a public **HTTPS** URL (tunnel + `WEBBA_DEPLOY_GITHUB_PUBLIC_URL` or Settings → General). |
+| Manifest error `"url" wasn't supplied` | Usually a malformed manifest (e.g. `hook_attributes` without a webhook URL). Update the plugin and retry. For local dev, use a public **HTTPS** URL. |
 | Other manifest errors on GitHub | Retry; ensure HTTPS and valid site URL. See [GitHub manifest docs](https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest). |
 | Private option disabled | Complete **Set up with GitHub** and **Install GitHub App** on the GitHub settings page. |
 | No repos in dropdown | On GitHub, edit the App installation and grant repository access. |

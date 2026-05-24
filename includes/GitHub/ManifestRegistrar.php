@@ -217,9 +217,6 @@ class ManifestRegistrar {
 			'description'              => 'Read-only access to deploy WordPress plugins and themes from GitHub.',
 			'public'                   => false,
 			'request_oauth_on_install' => false,
-			'hook_attributes'          => array(
-				'active' => false,
-			),
 			'redirect_url'             => add_query_arg( 'state', rawurlencode( $state ), $this->get_manifest_callback_url() ),
 			'callback_urls'            => array( $callback ),
 			'setup_url'                => $callback,
@@ -247,7 +244,7 @@ class ManifestRegistrar {
 	 */
 	private function render_github_form( array $manifest ): void {
 		$action = 'https://github.com/settings/apps/new';
-		$json   = wp_json_encode( $manifest );
+		$json   = wp_json_encode( $manifest, JSON_UNESCAPED_SLASHES );
 
 		if ( ! is_string( $json ) || '' === $json ) {
 			wp_die( esc_html__( 'Could not build GitHub App manifest.', 'webba-deploy' ) );
@@ -263,10 +260,13 @@ class ManifestRegistrar {
 		<body>
 			<p><?php echo esc_html__( 'Redirecting to GitHub to create your App…', 'webba-deploy' ); ?></p>
 			<form id="webba-deploy-github-manifest" action="<?php echo esc_url( $action ); ?>" method="post">
-				<input type="hidden" name="manifest" id="webba-deploy-manifest-json" value="" />
+				<textarea name="manifest" id="webba-deploy-manifest-json" hidden><?php echo esc_textarea( $json ); ?></textarea>
+				<noscript>
+					<p><?php echo esc_html__( 'JavaScript is required for automatic redirect. Click Continue to open GitHub.', 'webba-deploy' ); ?></p>
+					<button type="submit"><?php echo esc_html__( 'Continue to GitHub', 'webba-deploy' ); ?></button>
+				</noscript>
 			</form>
 			<script>
-				document.getElementById( 'webba-deploy-manifest-json' ).value = <?php echo wp_json_encode( $json ); ?>;
 				document.getElementById( 'webba-deploy-github-manifest' ).submit();
 			</script>
 		</body>
