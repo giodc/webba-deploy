@@ -16,7 +16,7 @@ use WebbaDeploy\GitHub\ManifestRegistrar;
 use WebbaDeploy\Security\Capability;
 
 /**
- * Coolify-style manifest setup + optional wp-config overrides.
+ * GitHub App manifest setup + optional wp-config overrides.
  */
 class GitHubSettingsPage {
 
@@ -36,7 +36,7 @@ class GitHubSettingsPage {
 		<div class="wrap webba-deploy">
 			<h1><?php echo esc_html__( 'GitHub connection', 'webba-deploy' ); ?></h1>
 			<p class="description">
-				<?php echo esc_html__( 'Set up a read-only GitHub App in a few clicks — same idea as Coolify: create the app on GitHub, pick repositories, then deploy private plugins and themes.', 'webba-deploy' ); ?>
+				<?php echo esc_html__( 'Set up a read-only GitHub App in a few clicks: create the app on GitHub, pick repositories, then deploy private plugins and themes.', 'webba-deploy' ); ?>
 			</p>
 
 			<h2><?php echo esc_html__( 'App permissions (read-only)', 'webba-deploy' ); ?></h2>
@@ -232,11 +232,11 @@ class GitHubSettingsPage {
 		<?php else : ?>
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $install_url ); ?>">
-					<?php echo esc_html__( 'Install GitHub App', 'webba-deploy' ); ?>
+					<?php echo esc_html__( 'Continue GitHub App installation', 'webba-deploy' ); ?>
 				</a>
 			</p>
 			<p class="description">
-				<?php echo esc_html__( 'Choose your user or organization, then "Only select repositories" (recommended).', 'webba-deploy' ); ?>
+				<?php echo esc_html__( 'The App is registered — finish on GitHub by choosing your user or organization, then "Only select repositories" (recommended).', 'webba-deploy' ); ?>
 			</p>
 		<?php endif; ?>
 		<?php
@@ -266,7 +266,7 @@ class GitHubSettingsPage {
 					$message = __( 'GitHub installation disconnected.', 'webba-deploy' );
 					break;
 				case 'registered':
-					$message = __( 'GitHub App registered. Install it to choose repositories.', 'webba-deploy' );
+					$message = __( 'GitHub App registered. Continue installation to choose repositories.', 'webba-deploy' );
 					break;
 				case 'reset':
 					$message = __( 'GitHub App registration removed from this site.', 'webba-deploy' );

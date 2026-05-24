@@ -35,7 +35,7 @@ Yes. Create a GitHub App with read-only Contents and Metadata permissions, add t
 == Changelog ==
 
 = 0.4.0 =
-* Coolify-style GitHub setup: one-click manifest registration (no wp-config required); credentials stored encrypted.
+* One Click GitHub setup: one-click manifest registration (no wp-config required); credentials stored encrypted.
 * Optional wp-config.php constants still override stored App.
 
 = 0.3.0 =

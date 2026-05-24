@@ -1,6 +1,6 @@
 <?php
 /**
- * Register a GitHub App via manifest flow (Coolify-style, no wp-config required).
+ * Register a GitHub App via manifest flow (no wp-config required).
  *
  * @package WebbaDeploy
  */
@@ -172,12 +172,11 @@ class ManifestRegistrar {
 		if ( is_wp_error( $install_url ) ) {
 			$this->redirect_with_notice(
 				'registered',
-				__( 'GitHub App registered. Connect it below to choose repositories.', 'webba-deploy' )
+				__( 'GitHub App registered. Continue installation to choose repositories.', 'webba-deploy' )
 			);
 		}
 
-		wp_safe_redirect( $install_url );
-		exit;
+		$this->redirect_to_github_install( $install_url );
 	}
 
 	/**
@@ -368,16 +367,34 @@ class ManifestRegistrar {
 	 * @param string $message Message.
 	 */
 	private function redirect_with_notice( string $notice, string $message ): void {
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'    => Menu::SLUG_GITHUB,
-					'notice'  => $notice,
-					'message' => rawurlencode( $message ),
-				),
-				admin_url( 'admin.php' )
-			)
+		$args = array(
+			'notice' => $notice,
 		);
+
+		if ( '' !== $message ) {
+			$args['message'] = $message;
+		}
+
+		wp_safe_redirect( Menu::github_settings_url( $args ) );
+		exit;
+	}
+
+	/**
+	 * Redirect to GitHub's App installation screen (external; wp_safe_redirect blocks this).
+	 *
+	 * @param string $url GitHub install URL.
+	 */
+	private function redirect_to_github_install( string $url ): void {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+
+		if ( ! is_string( $host ) || 'github.com' !== strtolower( $host ) ) {
+			$this->redirect_with_notice(
+				'error',
+				__( 'Invalid GitHub install URL.', 'webba-deploy' )
+			);
+		}
+
+		wp_redirect( $url );
 		exit;
 	}
 }

@@ -10,7 +10,7 @@
 
 ## 1. Vision & goals
 
-Webba Deploy lets site admins **install and update** WordPress **plugins** and **themes** directly from GitHub repositories, including **private** repos, using a **GitHub App** connection (Coolify-style: connect once → pick repo → deploy).
+Webba Deploy lets site admins **install and update** WordPress **plugins** and **themes** directly from GitHub repositories, including **private** repos, using a **GitHub App** connection (connect once → pick repo → deploy).
 
 ### Core outcomes
 
@@ -87,7 +87,7 @@ Each linked package shows:
 | Push-to-deploy URL | `POST` or `GET` to REST route with `secret` + `package` + `type` (GitHub Actions, generic CI) |
 | GitHub webhook (App) | On `push` to configured branch → plugin receives event → deploy |
 
-**Coolify-like auto webhook (v1 target):** When user enables push deploy on a private repo and App has permission, plugin calls GitHub API to create/update repo webhook pointing to your REST endpoint, with shared secret.
+**Auto webhook (v1 target):** When user enables push deploy on a private repo and App has permission, plugin calls GitHub API to create/update repo webhook pointing to your REST endpoint, with shared secret.
 
 ---
 
@@ -155,7 +155,7 @@ Create **Webba Deploy** GitHub App (one App for all users, typical for WP.org pl
 |------------|--------|-----|
 | Contents | Read | Download zipball / metadata |
 | Metadata | Read | Repo list, default branch |
-| Webhooks | Read & write | Auto-configure push webhooks (optional but Coolify-like) |
+| Webhooks | Read & write | Auto-configure push webhooks |
 
 **Subscribe to events:** `push` (and optionally `ping` for webhook test).
 
@@ -209,7 +209,7 @@ Never commit PEM to GitHub; ship **example** `.env.example` / `webba-deploy-conf
 
 **Security:** verify `state` nonce; `manage_options` capability; HTTPS only.
 
-### 4.5 Repo picker (private — Coolify-like)
+### 4.5 Repo picker (private)
 
 - `GET /installation/repositories` (paginate).  
 - Admin UI: searchable select `owner/repo`.  
@@ -249,7 +249,7 @@ POST /wp-json/webba-deploy/v1/github
 - Handle `ping` → 200 OK.  
 - Idempotency: debounce same commit SHA within N seconds (transient).
 
-### 5.3 Auto-configure repo webhook (Coolify replicate)
+### 5.3 Auto-configure repo webhook
 
 When user enables **Auto deploy on push** for a package:
 

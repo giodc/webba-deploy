@@ -231,7 +231,7 @@ class AddPackagePage {
 					<?php echo esc_html__( 'Repositories connected', 'webba-deploy' ); ?>
 				<?php else : ?>
 					<a href="<?php echo esc_url( $github_url ); ?>">
-						<?php echo esc_html__( 'Install GitHub App & choose repositories', 'webba-deploy' ); ?>
+						<?php echo esc_html__( 'Continue GitHub App installation & choose repositories', 'webba-deploy' ); ?>
 					</a>
 				<?php endif; ?>
 			</li>
@@ -275,6 +275,6 @@ class AddPackagePage {
 	 * GitHub settings URL.
 	 */
 	private function github_settings_url(): string {
-		return add_query_arg( 'page', Menu::SLUG_GITHUB, admin_url( 'admin.php' ) );
+		return Menu::github_settings_url();
 	}
 }

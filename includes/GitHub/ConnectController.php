@@ -235,16 +235,15 @@ class ConnectController {
 	 * @param string $message Message.
 	 */
 	private function redirect_with_notice( string $notice, string $message ): void {
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'    => Menu::SLUG_GITHUB,
-					'notice'  => $notice,
-					'message' => rawurlencode( $message ),
-				),
-				admin_url( 'admin.php' )
-			)
+		$args = array(
+			'notice' => $notice,
 		);
+
+		if ( '' !== $message ) {
+			$args['message'] = $message;
+		}
+
+		wp_safe_redirect( Menu::github_settings_url( $args ) );
 		exit;
 	}
 }

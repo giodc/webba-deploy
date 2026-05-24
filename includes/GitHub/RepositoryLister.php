@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace WebbaDeploy\GitHub;
 
 /**
- * Fetches repos the user granted during App installation (Coolify-style selection on GitHub).
+ * Fetches repos the user granted during App installation.
  */
 class RepositoryLister {
 

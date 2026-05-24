@@ -116,7 +116,7 @@ class AppConfig {
 	}
 
 	/**
-	 * Suggested read-only repository permissions (Coolify-style).
+	 * Suggested read-only repository permissions.
 	 *
 	 * @return array<int, array<string, string>>
 	 */

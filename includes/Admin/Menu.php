@@ -23,6 +23,21 @@ class Menu {
 	public const SLUG_SETTINGS   = 'webba-deploy-settings';
 
 	/**
+	 * GitHub settings admin screen URL.
+	 *
+	 * @param array<string, string> $query_args Optional query arguments.
+	 */
+	public static function github_settings_url( array $query_args = array() ): string {
+		$url = add_query_arg( 'page', self::SLUG_GITHUB, admin_url( 'admin.php' ) );
+
+		if ( ! empty( $query_args ) ) {
+			$url = add_query_arg( $query_args, $url );
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Register admin menu.
 	 */
 	public function register(): void {
@@ -164,13 +179,11 @@ class Menu {
 
 		if ( $config->uses_wp_config() ) {
 			wp_safe_redirect(
-				add_query_arg(
+				Menu::github_settings_url(
 					array(
-						'page'    => self::SLUG_GITHUB,
 						'notice'  => 'error',
-						'message' => rawurlencode( __( 'App credentials are defined in wp-config.php and cannot be removed here.', 'webba-deploy' ) ),
-					),
-					admin_url( 'admin.php' )
+						'message' => __( 'App credentials are defined in wp-config.php and cannot be removed here.', 'webba-deploy' ),
+					)
 				)
 			);
 			exit;
@@ -181,12 +194,10 @@ class Menu {
 		$github->reset_app_credentials();
 
 		wp_safe_redirect(
-			add_query_arg(
+			Menu::github_settings_url(
 				array(
-					'page'   => self::SLUG_GITHUB,
 					'notice' => 'reset',
-				),
-				admin_url( 'admin.php' )
+				)
 			)
 		);
 		exit;
@@ -202,13 +213,11 @@ class Menu {
 		( new \WebbaDeploy\GitHub\ConnectController() )->disconnect();
 
 		wp_safe_redirect(
-			add_query_arg(
+			Menu::github_settings_url(
 				array(
-					'page'    => self::SLUG_GITHUB,
 					'notice'  => 'disconnected',
-					'message' => rawurlencode( __( 'GitHub App disconnected.', 'webba-deploy' ) ),
-				),
-				admin_url( 'admin.php' )
+					'message' => __( 'GitHub App disconnected.', 'webba-deploy' ),
+				)
 			)
 		);
 		exit;

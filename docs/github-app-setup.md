@@ -1,6 +1,6 @@
 # GitHub App setup
 
-Webba Deploy uses a **read-only** GitHub App for private repositories. Repository access is chosen **on GitHub** during installation (Coolify-style).
+Webba Deploy uses a **read-only** GitHub App for private repositories. Repository access is chosen **on GitHub** during installation.
 
 ## Recommended: one-click setup (no wp-config)
 
