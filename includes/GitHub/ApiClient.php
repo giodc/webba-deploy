@@ -30,12 +30,12 @@ class ApiClient {
 	/**
 	 * Perform POST request against GitHub API.
 	 *
-	 * @param string               $path  API path.
-	 * @param array<string, mixed> $body  JSON body.
-	 * @param string|null          $token Bearer token.
+	 * @param string                   $path  API path.
+	 * @param array<string, mixed>|null $body  JSON body, or null for no body.
+	 * @param string|null              $token Bearer token.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public function post( string $path, array $body = array(), ?string $token = null ) {
+	public function post( string $path, ?array $body = null, ?string $token = null ) {
 		return $this->request( 'POST', $path, $body, $token );
 	}
 
@@ -55,7 +55,7 @@ class ApiClient {
 			);
 		}
 
-		return $this->request( 'POST', '/app-manifests/' . $code . '/conversions', array(), null );
+		return $this->request( 'POST', '/app-manifests/' . $code . '/conversions', null, null );
 	}
 
 	/**
@@ -99,6 +99,8 @@ class ApiClient {
 		if ( 'POST' === $method && null !== $body ) {
 			$args['headers']['Content-Type'] = 'application/json';
 			$args['body']                    = (string) wp_json_encode( $body );
+		} elseif ( 'POST' === $method ) {
+			$args['headers']['Content-Length'] = '0';
 		}
 
 		$response = wp_remote_request( $url, $args );

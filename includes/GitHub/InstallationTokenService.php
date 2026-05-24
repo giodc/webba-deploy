@@ -57,7 +57,7 @@ class InstallationTokenService {
 
 		$response = $this->api->post(
 			'/app/installations/' . $installation_id . '/access_tokens',
-			array(),
+			null,
 			$app_jwt
 		);
 
