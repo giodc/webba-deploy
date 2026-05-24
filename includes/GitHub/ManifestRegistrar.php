@@ -19,6 +19,9 @@ use WebbaDeploy\Security\Capability;
  */
 class ManifestRegistrar {
 
+	public const ACTION_MANIFEST_CALLBACK = 'webba_deploy_github_manifest_callback';
+	public const ACTION_INSTALL_CALLBACK  = 'webba_deploy_github_install_callback';
+
 	private AppCredentialStore $credentials;
 	private ApiClient $api;
 	private ManifestSiteUrl $site_url;
@@ -38,7 +41,9 @@ class ManifestRegistrar {
 	 */
 	public function register(): void {
 		add_action( 'admin_post_webba_deploy_github_manifest', array( $this, 'handle_start' ) );
-		add_action( 'admin_init', array( $this, 'maybe_handle_callback' ) );
+		add_action( 'admin_post_' . self::ACTION_MANIFEST_CALLBACK, array( $this, 'handle_manifest_callback' ) );
+		// Legacy admin.php callback URLs registered before admin-post switch.
+		add_action( 'admin_init', array( $this, 'maybe_handle_legacy_callback' ) );
 	}
 
 	/**
@@ -56,11 +61,9 @@ class ManifestRegistrar {
 	 */
 	public function get_manifest_callback_url(): string {
 		return add_query_arg(
-			array(
-				'page'   => Menu::SLUG_GITHUB,
-				'action' => 'manifest_callback',
-			),
-			$this->manifest_admin_url( 'admin.php' )
+			'action',
+			self::ACTION_MANIFEST_CALLBACK,
+			$this->site_url->admin_url( 'admin-post.php' )
 		);
 	}
 
@@ -69,11 +72,9 @@ class ManifestRegistrar {
 	 */
 	public function get_installation_callback_url(): string {
 		return add_query_arg(
-			array(
-				'page'   => Menu::SLUG_GITHUB,
-				'action' => 'callback',
-			),
-			$this->manifest_admin_url( 'admin.php' )
+			'action',
+			self::ACTION_INSTALL_CALLBACK,
+			$this->site_url->admin_url( 'admin-post.php' )
 		);
 	}
 
@@ -111,7 +112,7 @@ class ManifestRegistrar {
 
 		set_transient( $this->state_transient_key(), $state, HOUR_IN_SECONDS );
 
-		$manifest = $this->build_manifest( $state );
+		$manifest = $this->build_manifest();
 
 		if ( empty( $manifest['url'] ) ) {
 			$this->redirect_with_notice(
@@ -120,30 +121,20 @@ class ManifestRegistrar {
 			);
 		}
 
-		$this->render_github_form( $manifest );
+		$url_error = $this->validate_manifest_urls( $manifest );
+
+		if ( is_wp_error( $url_error ) ) {
+			$this->redirect_with_notice( 'error', $url_error->get_error_message() );
+		}
+
+		$this->render_github_form( $manifest, $state );
 		exit;
 	}
 
 	/**
-	 * Exchange manifest code for App credentials.
+	 * Exchange manifest code for App credentials (admin-post callback).
 	 */
-	public function maybe_handle_callback(): void {
-		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( empty( $_GET['page'] ) || Menu::SLUG_GITHUB !== $_GET['page'] ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( (string) $_GET['action'] ) ) : '';
-
-		if ( 'manifest_callback' !== $action ) {
-			return;
-		}
-
+	public function handle_manifest_callback(): void {
 		Capability::require_manage_settings();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -190,13 +181,35 @@ class ManifestRegistrar {
 	}
 
 	/**
+	 * Legacy admin.php?page=webba-deploy-github&action=manifest_callback handler.
+	 */
+	public function maybe_handle_legacy_callback(): void {
+		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['page'] ) || Menu::SLUG_GITHUB !== $_GET['page'] ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( (string) $_GET['action'] ) ) : '';
+
+		if ( 'manifest_callback' !== $action ) {
+			return;
+		}
+
+		$this->handle_manifest_callback();
+	}
+
+	/**
 	 * Build manifest JSON for GitHub.
 	 *
-	 * @param string $state CSRF state passed back by GitHub.
 	 * @return array<string, mixed>
 	 */
-	private function build_manifest( string $state ): array {
-		$homepage  = $this->site_url->get_homepage_url();
+	private function build_manifest(): array {
+		$homepage  = $this->site_url->get_homepage_url_for_manifest();
 		$site_name = get_bloginfo( 'name' );
 		$host      = wp_parse_url( $homepage, PHP_URL_HOST );
 		$name      = sprintf(
@@ -209,7 +222,8 @@ class ManifestRegistrar {
 			$name = substr( $name, 0, 34 );
 		}
 
-		$callback = $this->get_installation_callback_url();
+		$redirect_url = $this->site_url->sanitize_manifest_url( $this->get_manifest_callback_url() );
+		$callback_url = $this->site_url->sanitize_manifest_url( $this->get_installation_callback_url() );
 
 		return array(
 			'name'                     => $name,
@@ -217,9 +231,9 @@ class ManifestRegistrar {
 			'description'              => 'Read-only access to deploy WordPress plugins and themes from GitHub.',
 			'public'                   => false,
 			'request_oauth_on_install' => false,
-			'redirect_url'             => add_query_arg( 'state', rawurlencode( $state ), $this->get_manifest_callback_url() ),
-			'callback_urls'            => array( $callback ),
-			'setup_url'                => $callback,
+			'redirect_url'             => $redirect_url,
+			'callback_urls'            => array( $callback_url ),
+			'setup_url'                => $callback_url,
 			'default_permissions'      => array(
 				'contents' => 'read',
 				'metadata' => 'read',
@@ -229,22 +243,71 @@ class ManifestRegistrar {
 	}
 
 	/**
-	 * Admin URL for manifest callbacks (uses public site URL when set).
+	 * Validate manifest URLs before posting to GitHub.
 	 *
-	 * @param string $path Path relative to wp-admin/.
+	 * @param array<string, mixed> $manifest Manifest payload.
+	 * @return true|\WP_Error
 	 */
-	private function manifest_admin_url( string $path ): string {
-		return $this->site_url->admin_url( $path );
+	private function validate_manifest_urls( array $manifest ) {
+		$checks = array(
+			'url'          => __( 'homepage URL', 'webba-deploy' ),
+			'redirect_url' => __( 'redirect URL', 'webba-deploy' ),
+		);
+
+		foreach ( $checks as $key => $label ) {
+			$value = isset( $manifest[ $key ] ) ? (string) $manifest[ $key ] : '';
+
+			if ( '' === $value || ! wp_http_validate_url( $value ) ) {
+				return new \WP_Error(
+					'webba_deploy_manifest_invalid_' . $key,
+					sprintf(
+						/* translators: 1: URL field label, 2: URL value */
+						__( 'GitHub App %1$s is not valid: %2$s', 'webba-deploy' ),
+						$label,
+						$value
+					)
+				);
+			}
+		}
+
+		if ( empty( $manifest['callback_urls'] ) || ! is_array( $manifest['callback_urls'] ) ) {
+			return new \WP_Error(
+				'webba_deploy_manifest_invalid_callbacks',
+				__( 'GitHub App callback URL is missing.', 'webba-deploy' )
+			);
+		}
+
+		foreach ( $manifest['callback_urls'] as $callback_url ) {
+			$callback_url = (string) $callback_url;
+
+			if ( '' === $callback_url || ! wp_http_validate_url( $callback_url ) ) {
+				return new \WP_Error(
+					'webba_deploy_manifest_invalid_callback',
+					sprintf(
+						/* translators: %s: callback URL */
+						__( 'GitHub App callback URL is not valid: %s', 'webba-deploy' ),
+						$callback_url
+					)
+				);
+			}
+		}
+
+		return true;
 	}
 
 	/**
 	 * Auto-submit POST form to GitHub.
 	 *
 	 * @param array<string, mixed> $manifest Manifest payload.
+	 * @param string               $state    CSRF state for the GitHub form action URL.
 	 */
-	private function render_github_form( array $manifest ): void {
-		$action = 'https://github.com/settings/apps/new';
-		$json   = wp_json_encode( $manifest, JSON_UNESCAPED_SLASHES );
+	private function render_github_form( array $manifest, string $state ): void {
+		$form_action = add_query_arg(
+			'state',
+			$state,
+			'https://github.com/settings/apps/new'
+		);
+		$json        = wp_json_encode( $manifest, JSON_UNESCAPED_SLASHES );
 
 		if ( ! is_string( $json ) || '' === $json ) {
 			wp_die( esc_html__( 'Could not build GitHub App manifest.', 'webba-deploy' ) );
@@ -259,10 +322,10 @@ class ManifestRegistrar {
 		</head>
 		<body>
 			<p><?php echo esc_html__( 'Redirecting to GitHub to create your App…', 'webba-deploy' ); ?></p>
-			<form id="webba-deploy-github-manifest" action="<?php echo esc_url( $action ); ?>" method="post">
-				<textarea name="manifest" id="webba-deploy-manifest-json" hidden><?php echo esc_textarea( $json ); ?></textarea>
+			<form id="webba-deploy-github-manifest" action="<?php echo esc_url( $form_action ); ?>" method="post">
+				<input type="hidden" name="manifest" value="<?php echo esc_attr( $json ); ?>" />
 				<noscript>
-					<p><?php echo esc_html__( 'JavaScript is required for automatic redirect. Click Continue to open GitHub.', 'webba-deploy' ); ?></p>
+					<p><?php echo esc_html__( 'Click Continue to open GitHub.', 'webba-deploy' ); ?></p>
 					<button type="submit"><?php echo esc_html__( 'Continue to GitHub', 'webba-deploy' ); ?></button>
 				</noscript>
 			</form>

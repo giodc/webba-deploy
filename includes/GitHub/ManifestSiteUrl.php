@@ -48,6 +48,15 @@ class ManifestSiteUrl {
 	}
 
 	/**
+	 * Homepage URL without trailing slash (GitHub manifest "url" field).
+	 */
+	public function get_homepage_url_for_manifest(): string {
+		$url = $this->get_homepage_url();
+
+		return '' === $url ? '' : untrailingslashit( $url );
+	}
+
+	/**
 	 * Whether the site URL looks usable for GitHub manifest registration.
 	 *
 	 * @return true|\WP_Error
@@ -95,16 +104,58 @@ class ManifestSiteUrl {
 	/**
 	 * Build an absolute admin URL using the manifest site origin.
 	 *
-	 * @param string $admin_path Path under wp-admin, e.g. admin.php?page=...
+	 * Preserves WordPress subdirectory paths from site_url() while swapping the
+	 * public origin when WEBBA_DEPLOY_GITHUB_PUBLIC_URL is used for tunnels.
+	 *
+	 * @param string $admin_path Path under wp-admin, e.g. admin-post.php.
 	 */
 	public function admin_url( string $admin_path ): string {
-		$base = $this->get_homepage_url();
+		$resolved = admin_url( $admin_path );
+		$public   = $this->get_homepage_url();
 
-		if ( '' === $base ) {
-			return admin_url( $admin_path );
+		if ( '' === $public ) {
+			return $this->sanitize_manifest_url( $resolved );
 		}
 
-		return trailingslashit( $base ) . 'wp-admin/' . ltrim( $admin_path, '/' );
+		return $this->sanitize_manifest_url( $this->replace_url_origin( $resolved, $public ) );
+	}
+
+	/**
+	 * Ensure a manifest URL is absolute HTTPS and passes basic validation.
+	 */
+	public function sanitize_manifest_url( string $url ): string {
+		$url = esc_url_raw( $url );
+
+		if ( '' === $url || ! wp_http_validate_url( $url ) ) {
+			return '';
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Replace scheme/host/port on a WordPress URL with the public site origin.
+	 */
+	private function replace_url_origin( string $url, string $public_homepage ): string {
+		$public_parts = wp_parse_url( untrailingslashit( $public_homepage ) );
+		$url_parts    = wp_parse_url( $url );
+
+		if ( ! is_array( $public_parts ) || ! is_array( $url_parts ) ) {
+			return $url;
+		}
+
+		$scheme = $public_parts['scheme'] ?? 'https';
+		$host   = $public_parts['host'] ?? '';
+
+		if ( '' === $host ) {
+			return $url;
+		}
+
+		$port  = isset( $public_parts['port'] ) ? ':' . $public_parts['port'] : '';
+		$path  = $url_parts['path'] ?? '';
+		$query = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
+
+		return $scheme . '://' . $host . $port . $path . $query;
 	}
 
 	/**

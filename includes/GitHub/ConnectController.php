@@ -38,7 +38,8 @@ class ConnectController {
 	 * Register hooks.
 	 */
 	public function register(): void {
-		add_action( 'admin_init', array( $this, 'maybe_handle_callback' ) );
+		add_action( 'admin_post_' . ManifestRegistrar::ACTION_INSTALL_CALLBACK, array( $this, 'handle_install_callback' ) );
+		add_action( 'admin_init', array( $this, 'maybe_handle_legacy_callback' ) );
 	}
 
 	/**
@@ -68,25 +69,9 @@ class ConnectController {
 	}
 
 	/**
-	 * Process GitHub setup URL redirect.
+	 * Process GitHub setup URL redirect (admin-post callback).
 	 */
-	public function maybe_handle_callback(): void {
-		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( empty( $_GET['page'] ) || Menu::SLUG_GITHUB !== $_GET['page'] ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( (string) $_GET['action'] ) ) : '';
-
-		if ( 'callback' !== $action ) {
-			return;
-		}
-
+	public function handle_install_callback(): void {
 		Capability::require_manage_settings();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -120,6 +105,29 @@ class ConnectController {
 				$this->connection->get_account_label()
 			)
 		);
+	}
+
+	/**
+	 * Legacy admin.php?page=webba-deploy-github&action=callback handler.
+	 */
+	public function maybe_handle_legacy_callback(): void {
+		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['page'] ) || Menu::SLUG_GITHUB !== $_GET['page'] ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( (string) $_GET['action'] ) ) : '';
+
+		if ( 'callback' !== $action ) {
+			return;
+		}
+
+		$this->handle_install_callback();
 	}
 
 	/**

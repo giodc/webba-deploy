@@ -46,7 +46,7 @@ When these constants are set, they **override** any App registered via one-click
 Manual App creation on GitHub is still supported — use this setup URL:
 
 ```
-https://YOUR-SITE.com/wp-admin/admin.php?page=webba-deploy-github&action=callback
+https://YOUR-SITE.com/wp-admin/admin-post.php?action=webba_deploy_github_install_callback
 ```
 
 ## Permissions
@@ -67,7 +67,7 @@ Webhooks are **not** required for deploy (optional for future auto-deploy).
 
 | Issue | Fix |
 |-------|-----|
-| Manifest error `"url" wasn't supplied` | Usually a malformed manifest (e.g. `hook_attributes` without a webhook URL). Update the plugin and retry. For local dev, use a public **HTTPS** URL. |
-| Other manifest errors on GitHub | Retry; ensure HTTPS and valid site URL. See [GitHub manifest docs](https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest). |
+| Manifest error `"url" wasn't supplied` | Usually a malformed manifest (e.g. `hook_attributes` without a webhook URL). Update the plugin and retry. |
+| Manifest error `redirect_url must be a valid URL` | Update the plugin — manifest URLs must not contain `&` query separators. Use admin-post callback URLs. |
 | Private option disabled | Complete **Set up with GitHub** and **Install GitHub App** on the GitHub settings page. |
 | No repos in dropdown | On GitHub, edit the App installation and grant repository access. |
