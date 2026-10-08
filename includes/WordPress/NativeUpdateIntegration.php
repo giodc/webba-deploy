@@ -68,6 +68,13 @@ class NativeUpdateIntegration {
 	 * @return object|false
 	 */
 	public function inject_plugin_updates( $transient ) {
+		$packages = $this->packages->all( PackageRepository::TYPE_PLUGIN );
+
+		// Do not fabricate an update transient when nothing is managed.
+		if ( ! is_object( $transient ) && empty( $packages ) ) {
+			return $transient;
+		}
+
 		if ( ! is_object( $transient ) ) {
 			$transient = new \stdClass();
 		}
@@ -80,7 +87,7 @@ class NativeUpdateIntegration {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		foreach ( $this->packages->all( PackageRepository::TYPE_PLUGIN ) as $package ) {
+		foreach ( $packages as $package ) {
 			$offer = $this->build_plugin_update_offer( $package );
 
 			if ( null === $offer ) {
@@ -100,6 +107,13 @@ class NativeUpdateIntegration {
 	 * @return object|false
 	 */
 	public function inject_theme_updates( $transient ) {
+		$packages = $this->packages->all( PackageRepository::TYPE_THEME );
+
+		// Do not fabricate an update transient when nothing is managed.
+		if ( ! is_object( $transient ) && empty( $packages ) ) {
+			return $transient;
+		}
+
 		if ( ! is_object( $transient ) ) {
 			$transient = new \stdClass();
 		}
@@ -108,7 +122,7 @@ class NativeUpdateIntegration {
 			$transient->response = array();
 		}
 
-		foreach ( $this->packages->all( PackageRepository::TYPE_THEME ) as $package ) {
+		foreach ( $packages as $package ) {
 			$offer = $this->build_theme_update_offer( $package );
 
 			if ( null === $offer ) {

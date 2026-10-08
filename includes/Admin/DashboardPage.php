@@ -227,7 +227,12 @@ class DashboardPage {
 						id="<?php echo esc_attr( $input_id ); ?>"
 						value="<?php echo esc_url( $deploy_url ); ?>"
 					/>
-					<button type="button" class="button button-small webba-deploy-copy" data-copy-target="<?php echo esc_attr( $input_id ); ?>">
+					<button
+						type="button"
+						class="button button-small webba-deploy-copy"
+						data-copy-target="<?php echo esc_attr( $input_id ); ?>"
+						data-copied-label="<?php echo esc_attr__( 'Copied!', 'webba-deploy' ); ?>"
+					>
 						<?php echo esc_html__( 'Copy', 'webba-deploy' ); ?>
 					</button>
 				</div>

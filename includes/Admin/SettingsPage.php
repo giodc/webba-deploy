@@ -52,7 +52,12 @@ class SettingsPage {
 									id="webba-deploy-full-secret"
 									value="<?php echo esc_attr( $secret ); ?>"
 								/>
-								<button type="button" class="button webba-deploy-copy" data-copy-target="webba-deploy-full-secret">
+								<button
+									type="button"
+									class="button webba-deploy-copy"
+									data-copy-target="webba-deploy-full-secret"
+									data-copied-label="<?php echo esc_attr__( 'Copied!', 'webba-deploy' ); ?>"
+								>
 									<?php echo esc_html__( 'Copy', 'webba-deploy' ); ?>
 								</button>
 							</p>

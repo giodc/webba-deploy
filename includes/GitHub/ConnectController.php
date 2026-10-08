@@ -44,8 +44,10 @@ class ConnectController {
 
 	/**
 	 * Build GitHub App installation URL (user picks account + repos on GitHub).
+	 *
+	 * @return string|\WP_Error
 	 */
-	public function get_install_url(): string|\WP_Error {
+	public function get_install_url() {
 		if ( ! $this->config->is_configured() ) {
 			return new \WP_Error(
 				'webba_deploy_github_not_configured',

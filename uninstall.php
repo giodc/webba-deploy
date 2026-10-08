@@ -29,3 +29,14 @@ $options = array(
 foreach ( $options as $option ) {
 	delete_option( $option );
 }
+
+global $wpdb;
+
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+		$wpdb->esc_like( '_transient_webba_deploy_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_webba_deploy_' ) . '%'
+	)
+);

@@ -3,12 +3,19 @@
 	"description": "Deploy WordPress plugins and themes from GitHub",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
+	"autoload": {
+		"psr-4": {
+			"WebbaDeploy\\": "includes/"
+		}
+	},
 	"require": {
 		"php": ">=7.4"
 	},
 	"require-dev": {
+		"brain/monkey": "^2.7",
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpunit/phpunit": "^11.5 || ^12.5 || ^13.0",
 		"wp-coding-standards/wpcs": "^3.0"
 	},
 	"config": {
@@ -18,6 +25,8 @@
 	},
 	"scripts": {
 		"phpcs": "phpcs -n",
-		"phpcbf": "phpcbf"
+		"phpcbf": "phpcbf",
+		"make-pot": "bash scripts/make-pot.sh",
+		"test": "phpunit"
 	}
 }

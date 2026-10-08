@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       Webba Deploy
- * Plugin URI:        https://github.com/webba/webba-deploy
+ * Plugin URI:        https://wordpress.org/plugins/webba-deploy/
  * Description:       Deploy plugins and themes from GitHub — public or private — with one-click installs and push-to-deploy.
- * Version:           0.4.0
+ * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            Webba
- * Author URI:        https://webba-booking.com
+ * Author:            Giovanni De Carlo
+ * Author URI:        https://giodc.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       webba-deploy
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WEBBA_DEPLOY_VERSION', '0.4.0' );
+define( 'WEBBA_DEPLOY_VERSION', '1.0.0' );
 define( 'WEBBA_DEPLOY_PLUGIN_FILE', __FILE__ );
 define( 'WEBBA_DEPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WEBBA_DEPLOY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

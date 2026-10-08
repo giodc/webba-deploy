@@ -111,16 +111,20 @@ class RepositoryLister {
 	}
 
 	/**
-	 * Whether owner/repo is in the installation.
+	 * Access state for owner/repo in the installation.
+	 *
+	 * Distinguishes a definite "not granted" (false) from a failed lookup
+	 * (WP_Error) so callers can retry instead of reporting a false denial.
 	 *
 	 * @param string $owner Owner.
 	 * @param string $repo  Repo name.
+	 * @return true|false|\WP_Error
 	 */
-	public function installation_has_repository( string $owner, string $repo ): bool {
+	public function repository_access( string $owner, string $repo ) {
 		$list = $this->list_repositories();
 
 		if ( is_wp_error( $list ) ) {
-			return false;
+			return $list;
 		}
 
 		$needle = strtolower( $owner ) . '/' . strtolower( $repo );
@@ -132,6 +136,16 @@ class RepositoryLister {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether owner/repo is in the installation.
+	 *
+	 * @param string $owner Owner.
+	 * @param string $repo  Repo name.
+	 */
+	public function installation_has_repository( string $owner, string $repo ): bool {
+		return true === $this->repository_access( $owner, $repo );
 	}
 
 	/**

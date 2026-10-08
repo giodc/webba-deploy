@@ -10,9 +10,7 @@ declare(strict_types=1);
 namespace WebbaDeploy\Core;
 
 use WebbaDeploy\GitHub\CommitChecker;
-use WebbaDeploy\GitHub\ConnectionStore;
-use WebbaDeploy\GitHub\InstallationTokenService;
-use WebbaDeploy\GitHub\RepositoryLister;
+use WebbaDeploy\GitHub\GitHubAppAuth;
 use WebbaDeploy\Logging\Logger;
 use WebbaDeploy\Security\Capability;
 
@@ -20,6 +18,16 @@ use WebbaDeploy\Security\Capability;
  * Single code path: download zipball → upgrader → log.
  */
 class DeployService {
+
+	/**
+	 * Option key for the deploy lock.
+	 */
+	private const LOCK_OPTION = 'webba_deploy_deploy_lock';
+
+	/**
+	 * Seconds after which a stale lock is discarded.
+	 */
+	private const LOCK_TTL = 900;
 
 	/**
 	 * Package storage.
@@ -50,23 +58,33 @@ class DeployService {
 	private Logger $logger;
 
 	/**
+	 * Private-repository auth resolver.
+	 *
+	 * @var GitHubAppAuth
+	 */
+	private GitHubAppAuth $auth;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param PackageRepository|null $packages   Package repository.
 	 * @param ArchiveDownloader|null $downloader Archive downloader.
 	 * @param UpgraderFactory|null   $upgrader   Upgrader factory.
 	 * @param Logger|null            $logger     Logger instance.
+	 * @param GitHubAppAuth|null     $auth       GitHub App auth resolver.
 	 */
 	public function __construct(
 		?PackageRepository $packages = null,
 		?ArchiveDownloader $downloader = null,
 		?UpgraderFactory $upgrader = null,
-		?Logger $logger = null
+		?Logger $logger = null,
+		?GitHubAppAuth $auth = null
 	) {
 		$this->packages   = $packages ?? new PackageRepository();
 		$this->downloader = $downloader ?? new ArchiveDownloader();
 		$this->upgrader   = $upgrader ?? new UpgraderFactory();
 		$this->logger     = $logger ?? new Logger();
+		$this->auth       = $auth ?? new GitHubAppAuth();
 	}
 
 	/**
@@ -120,7 +138,7 @@ class DeployService {
 	}
 
 	/**
-	 * Run deploy pipeline for a resolved package record.
+	 * Run deploy pipeline for a resolved package record, guarded by a deploy lock.
 	 *
 	 * @param string               $type               Package type.
 	 * @param array<string, mixed> $package            Package record.
@@ -128,6 +146,29 @@ class DeployService {
 	 * @return true|\WP_Error
 	 */
 	private function deploy_package( string $type, array $package, bool $require_capability ) {
+		if ( ! $this->acquire_lock() ) {
+			return new \WP_Error(
+				'webba_deploy_locked',
+				__( 'Another deploy is already in progress. Please try again shortly.', 'webba-deploy' )
+			);
+		}
+
+		try {
+			return $this->run_deploy_pipeline( $type, $package, $require_capability );
+		} finally {
+			$this->release_lock();
+		}
+	}
+
+	/**
+	 * Execute the deploy pipeline for a resolved package record.
+	 *
+	 * @param string               $type               Package type.
+	 * @param array<string, mixed> $package            Package record.
+	 * @param bool                 $require_capability Whether to elevate user for upgrader.
+	 * @return true|\WP_Error
+	 */
+	private function run_deploy_pipeline( string $type, array $package, bool $require_capability ) {
 		$id = (string) ( $package['id'] ?? '' );
 
 		if ( '' === $id ) {
@@ -334,41 +375,7 @@ class DeployService {
 	 * @return null|string|\WP_Error
 	 */
 	private function resolve_download_token( array $package ) {
-		if ( 'private' !== ( $package['visibility'] ?? 'public' ) ) {
-			return null;
-		}
-
-		$connection = new ConnectionStore();
-
-		if ( ! $connection->is_connected() ) {
-			return new \WP_Error(
-				'webba_deploy_private_requires_app',
-				__( 'Connect the GitHub App before deploying private repositories.', 'webba-deploy' )
-			);
-		}
-
-		$owner = (string) ( $package['owner'] ?? '' );
-		$repo  = (string) ( $package['repo'] ?? '' );
-
-		$lister = new RepositoryLister();
-
-		if ( ! $lister->installation_has_repository( $owner, $repo ) ) {
-			return new \WP_Error(
-				'webba_deploy_repo_not_granted',
-				__( 'This repository is not available on your GitHub App installation. Grant access on GitHub or pick another repository.', 'webba-deploy' )
-			);
-		}
-
-		$installation_id = $connection->get_installation_id();
-
-		if ( null === $installation_id ) {
-			return new \WP_Error(
-				'webba_deploy_private_requires_app',
-				__( 'GitHub App installation ID is missing.', 'webba-deploy' )
-			);
-		}
-
-		return ( new InstallationTokenService() )->get_token( $installation_id );
+		return $this->auth->token_for_package( $package );
 	}
 
 	/**
@@ -430,6 +437,30 @@ class DeployService {
 		}
 
 		wp_set_current_user( $previous_user );
+	}
+
+	/**
+	 * Acquire the deploy lock. Stale locks older than LOCK_TTL are discarded.
+	 */
+	private function acquire_lock(): bool {
+		$lock = get_option( self::LOCK_OPTION );
+
+		if ( is_numeric( $lock ) ) {
+			if ( ( time() - (int) $lock ) < self::LOCK_TTL ) {
+				return false;
+			}
+
+			delete_option( self::LOCK_OPTION );
+		}
+
+		return (bool) add_option( self::LOCK_OPTION, time(), '', false );
+	}
+
+	/**
+	 * Release the deploy lock.
+	 */
+	private function release_lock(): void {
+		delete_option( self::LOCK_OPTION );
 	}
 
 	/**

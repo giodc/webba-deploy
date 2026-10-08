@@ -61,6 +61,13 @@ class Plugin {
 			}
 		);
 
+		add_action( 'init', array( $this, 'load_textdomain' ) );
+	}
+
+	/**
+	 * Load plugin translations.
+	 */
+	public function load_textdomain(): void {
 		load_plugin_textdomain(
 			WEBBA_DEPLOY_TEXT_DOMAIN,
 			false,

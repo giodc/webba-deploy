@@ -16,11 +16,12 @@ use WebbaDeploy\Security\Capability;
  */
 class Menu {
 
-	public const SLUG_DASHBOARD  = 'webba-deploy';
-	public const SLUG_ADD_PLUGIN = 'webba-deploy-add-plugin';
-	public const SLUG_ADD_THEME  = 'webba-deploy-add-theme';
-	public const SLUG_GITHUB     = 'webba-deploy-github';
-	public const SLUG_SETTINGS   = 'webba-deploy-settings';
+	public const SLUG_DASHBOARD        = 'webba-deploy';
+	public const SLUG_ADD_PLUGIN       = 'webba-deploy-add-plugin';
+	public const SLUG_ADD_THEME        = 'webba-deploy-add-theme';
+	public const SLUG_GITHUB           = 'webba-deploy-github';
+	public const SLUG_SETTINGS         = 'webba-deploy-settings';
+	public const SLUG_SETTINGS_GENERAL = 'webba-deploy-general';
 
 	/**
 	 * GitHub settings admin screen URL.
@@ -105,6 +106,15 @@ class Menu {
 			array( new GitHubSettingsPage(), 'render' )
 		);
 
+		add_submenu_page(
+			self::SLUG_DASHBOARD,
+			__( 'Settings', 'webba-deploy' ),
+			__( 'Settings', 'webba-deploy' ),
+			'manage_options',
+			self::SLUG_SETTINGS_GENERAL,
+			array( new GeneralSettingsPage(), 'render' )
+		);
+
 		global $submenu;
 
 		if ( isset( $submenu[ self::SLUG_DASHBOARD ][0][0] ) ) {
@@ -144,7 +154,44 @@ class Menu {
 			case 'check_updates':
 				$this->handle_check_updates();
 				break;
+			case 'save_settings':
+				$this->handle_save_settings();
+				break;
 		}
+	}
+
+	/**
+	 * Save general plugin settings.
+	 */
+	private function handle_save_settings(): void {
+		check_admin_referer( 'webba_deploy_save_settings' );
+		Capability::require_manage_settings();
+
+		update_option(
+			'webba_deploy_settings',
+			array(
+				'logging'     => ! empty( $_POST['logging'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'flush_cache' => ! empty( $_POST['flush_cache'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			),
+			false
+		);
+
+		update_option(
+			'webba_deploy_delete_on_uninstall',
+			! empty( $_POST['delete_on_uninstall'] ) ? 1 : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			false
+		);
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'   => self::SLUG_SETTINGS_GENERAL,
+					'notice' => 'settings_saved',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -312,13 +359,13 @@ class Menu {
 
 		Capability::require_deploy( $type );
 
-		$visibility = isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( (string) $_POST['visibility'] ) ) : 'public'; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$mode = isset( $_POST['visibility'] ) ? sanitize_key( wp_unslash( (string) $_POST['visibility'] ) ) : 'public'; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		if ( ! in_array( $visibility, array( 'public', 'private' ), true ) ) {
-			$visibility = 'public';
+		if ( ! in_array( $mode, array( 'public', 'private' ), true ) ) {
+			$mode = 'public';
 		}
 
-		if ( 'private' === $visibility ) {
+		if ( 'private' === $mode ) {
 			$connection = new \WebbaDeploy\GitHub\ConnectionStore();
 
 			if ( ! $connection->is_connected() ) {
@@ -338,19 +385,34 @@ class Menu {
 				'owner' => $parts[0],
 				'repo'  => $parts[1],
 			);
-
-			$lister = new \WebbaDeploy\GitHub\RepositoryLister();
-
-			if ( ! $lister->installation_has_repository( $parsed['owner'], $parsed['repo'] ) ) {
-				wp_safe_redirect( $this->add_redirect_url( $type, 'error', __( 'Repository is not granted to your GitHub App installation.', 'webba-deploy' ) ) );
-				exit;
-			}
 		} else {
 			$repo_url = isset( $_POST['repo_url'] ) ? esc_url_raw( wp_unslash( (string) $_POST['repo_url'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$parsed   = \WebbaDeploy\Core\PackageRepository::parse_github_url( $repo_url );
 
 			if ( null === $parsed ) {
 				wp_safe_redirect( $this->add_redirect_url( $type, 'error', __( 'Invalid GitHub repository URL.', 'webba-deploy' ) ) );
+				exit;
+			}
+		}
+
+		// Trust GitHub's actual visibility, not the submitted radio value.
+		$visibility = ( new \WebbaDeploy\GitHub\GitHubAppAuth() )->resolve_visibility(
+			$parsed['owner'],
+			$parsed['repo'],
+			'private' === $mode ? 'private' : 'public'
+		);
+
+		if ( is_wp_error( $visibility ) ) {
+			wp_safe_redirect( $this->add_redirect_url( $type, 'error', $visibility->get_error_message() ) );
+			exit;
+		}
+
+		if ( 'private' === $visibility ) {
+			$config     = new \WebbaDeploy\GitHub\AppConfig();
+			$connection = new \WebbaDeploy\GitHub\ConnectionStore();
+
+			if ( ! $config->is_configured() || ! $connection->is_connected() ) {
+				wp_safe_redirect( $this->add_redirect_url( $type, 'error', __( 'This repository is private. Connect the GitHub App (Webba Deploy → GitHub) and grant it access to add it.', 'webba-deploy' ) ) );
 				exit;
 			}
 		}

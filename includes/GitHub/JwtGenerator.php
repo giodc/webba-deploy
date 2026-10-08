@@ -54,9 +54,6 @@ class JwtGenerator {
 		$signature = '';
 		$signed    = openssl_sign( $signing_input, $signature, $key, OPENSSL_ALGO_SHA256 );
 
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- OpenSSL resource cleanup.
-		openssl_free_key( $key );
-
 		if ( ! $signed || '' === $signature ) {
 			return new \WP_Error(
 				'webba_deploy_jwt_sign',

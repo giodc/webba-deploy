@@ -25,8 +25,11 @@ class CommitChecker {
 
 	private ApiClient $api;
 
-	public function __construct( ?ApiClient $api = null ) {
-		$this->api = $api ?? new ApiClient();
+	private GitHubAppAuth $auth;
+
+	public function __construct( ?ApiClient $api = null, ?GitHubAppAuth $auth = null ) {
+		$this->api  = $api ?? new ApiClient();
+		$this->auth = $auth ?? new GitHubAppAuth();
 	}
 
 	/**
@@ -244,23 +247,7 @@ class CommitChecker {
 	 * @return string|null|\WP_Error
 	 */
 	private function resolve_api_token( array $package ) {
-		if ( 'private' !== ( $package['visibility'] ?? 'public' ) ) {
-			return null;
-		}
-
-		$connection = new ConnectionStore();
-
-		if ( ! $connection->is_connected() ) {
-			return new \WP_Error( 'webba_deploy_not_connected', '' );
-		}
-
-		$installation_id = $connection->get_installation_id();
-
-		if ( null === $installation_id ) {
-			return new \WP_Error( 'webba_deploy_not_connected', '' );
-		}
-
-		return ( new InstallationTokenService() )->get_token( $installation_id );
+		return $this->auth->token_for_package( $package );
 	}
 
 }

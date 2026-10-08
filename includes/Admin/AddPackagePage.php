@@ -96,7 +96,7 @@ class AddPackagePage {
 										name="visibility"
 										value="private"
 										class="webba-deploy-visibility"
-										<?php disabled( ! $configured ); ?>
+										<?php disabled( ! $private_ok ); ?>
 									/>
 									<?php echo esc_html__( 'Private (GitHub App)', 'webba-deploy' ); ?>
 								</label>
@@ -118,7 +118,7 @@ class AddPackagePage {
 								value=""
 							/>
 							<p class="description">
-								<?php echo esc_html__( 'Public GitHub repository URL. The repository root must be the plugin or theme root.', 'webba-deploy' ); ?>
+								<?php echo esc_html__( 'GitHub repository URL. Public repos work directly; a private URL requires the GitHub App. The repository root must be the plugin or theme root.', 'webba-deploy' ); ?>
 							</p>
 						</td>
 					</tr>

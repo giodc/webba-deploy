@@ -19,6 +19,7 @@ class Assets {
 		'webba-deploy_page_webba-deploy-add-plugin',
 		'webba-deploy_page_webba-deploy-add-theme',
 		'webba-deploy_page_webba-deploy-settings',
+		'webba-deploy_page_webba-deploy-general',
 		'webba-deploy_page_webba-deploy-github',
 	);
 
