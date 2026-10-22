@@ -2,34 +2,48 @@
 #
 # Build a WordPress.org–ready plugin zip and optional SVN assets archive.
 #
+# Output goes next to the plugin (../webba-deploy-dist/) so Plugin Check does
+# not flag compressed files inside the plugin directory.
+#
 # Usage:
-#   ./build-release.sh              # plugin zip only
-#   ./build-release.sh --assets     # regenerate wordpress.org PNGs first
-#   ./build-release.sh --all        # assets + plugin zip + SVN assets zip
+#   ./build-release.sh                 # plugin zip only
+#   ./build-release.sh --assets        # generate missing wordpress.org PNGs
+#   ./build-release.sh --force-assets  # overwrite existing PNGs
+#   ./build-release.sh --all           # missing assets + plugin zip + SVN assets zip
+#   ./build-release.sh --tag           # create git tag v{version} after building (clean tree only)
 #
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_SLUG="webba-deploy"
-BUILD_DIR="${ROOT}/build"
+# Outside the plugin tree so PCP compressed_files does not flag the zip.
+BUILD_DIR="${ROOT}/../${PLUGIN_SLUG}-dist"
 DIST_DIR="${BUILD_DIR}/${PLUGIN_SLUG}"
 DISTIGNORE="${ROOT}/.distignore"
 ASSETS_DIR="${ROOT}/assets/wordpress-org"
+LEGACY_BUILD="${ROOT}/build"
 
-REGENERATE_ASSETS=0
+ASSETS_MODE="none"
 PACKAGE_SVN_ASSETS=0
+TAG_RELEASE=0
 
 for arg in "$@"; do
 	case "$arg" in
 		--assets)
-			REGENERATE_ASSETS=1
+			ASSETS_MODE="missing"
+			;;
+		--force-assets)
+			ASSETS_MODE="force"
 			;;
 		--all)
-			REGENERATE_ASSETS=1
+			ASSETS_MODE="missing"
 			PACKAGE_SVN_ASSETS=1
 			;;
+		--tag)
+			TAG_RELEASE=1
+			;;
 		--help|-h)
-			echo "Usage: $0 [--assets] [--all]"
+			echo "Usage: $0 [--assets|--force-assets] [--all] [--tag]"
 			exit 0
 			;;
 		*)
@@ -48,22 +62,56 @@ get_version() {
 	"
 }
 
+get_constant_version() {
+	php -r "
+		\$contents = file_get_contents( '${ROOT}/webba-deploy.php' );
+		if ( preg_match( '/WEBBA_DEPLOY_VERSION\',\s*\'([^\']+)\'/', \$contents, \$m ) ) {
+			echo trim( \$m[1] );
+		}
+	"
+}
+
+get_stable_tag() {
+	sed -n 's/^Stable tag:[[:space:]]*//p' "${ROOT}/readme.txt" | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//'
+}
+
 VERSION="$(get_version)"
 if [[ -z "${VERSION}" ]]; then
 	echo "Could not read plugin version from webba-deploy.php" >&2
 	exit 1
 fi
 
+CONSTANT_VERSION="$(get_constant_version)"
+STABLE_TAG="$(get_stable_tag)"
+
+if [[ "${CONSTANT_VERSION}" != "${VERSION}" ]]; then
+	echo "Version mismatch: webba-deploy.php header is ${VERSION}, WEBBA_DEPLOY_VERSION is ${CONSTANT_VERSION}." >&2
+	exit 1
+fi
+
+if [[ "${STABLE_TAG}" != "${VERSION}" ]]; then
+	echo "Version mismatch: webba-deploy.php header is ${VERSION}, readme.txt Stable tag is ${STABLE_TAG}." >&2
+	exit 1
+fi
+
+if ! grep -q "^= ${VERSION} =" "${ROOT}/readme.txt"; then
+	echo "Warning: readme.txt has no '= ${VERSION} =' changelog entry." >&2
+fi
+
 ZIP_PATH="${BUILD_DIR}/${PLUGIN_SLUG}-${VERSION}.zip"
 SVN_ASSETS_ZIP="${BUILD_DIR}/${PLUGIN_SLUG}-wordpress-org-assets-${VERSION}.zip"
 
-if [[ "${REGENERATE_ASSETS}" -eq 1 ]]; then
-	echo "Generating WordPress.org assets…"
-	python3 "${ROOT}/scripts/generate-wordpress-org-assets.py"
+# Drop legacy in-plugin build/ so Plugin Check stops flagging nested zips.
+if [[ -d "${LEGACY_BUILD}" ]]; then
+	echo "Removing legacy ${LEGACY_BUILD}/ (output is now ${BUILD_DIR}/)…"
+	rm -rf "${LEGACY_BUILD}"
 fi
 
-if [[ ! -f "${ASSETS_DIR}/icon-256x256.png" ]]; then
-	echo "WordPress.org assets missing; generating…"
+if [[ "${ASSETS_MODE}" == "force" ]]; then
+	echo "Regenerating WordPress.org assets…"
+	python3 "${ROOT}/scripts/generate-wordpress-org-assets.py" --force
+elif [[ "${ASSETS_MODE}" == "missing" || ! -f "${ASSETS_DIR}/icon-256x256.png" ]]; then
+	echo "Generating missing WordPress.org assets…"
 	python3 "${ROOT}/scripts/generate-wordpress-org-assets.py"
 fi
 
@@ -85,7 +133,12 @@ rsync -a \
 	--exclude 'scripts/' \
 	--exclude 'assets/wordpress-org/' \
 	--exclude 'build-release.sh' \
+	--exclude '._*' \
+	--exclude '.DS_Store' \
 	"${ROOT}/" "${DIST_DIR}/"
+
+# Belt-and-suspenders: strip macOS AppleDouble / junk if any slipped through.
+find "${DIST_DIR}" -mindepth 1 \( -name '._*' -o -name '.DS_Store' -o -name '.*' \) -exec rm -rf {} + 2>/dev/null || true
 
 mkdir -p "${BUILD_DIR}"
 rm -f "${ZIP_PATH}"
@@ -101,10 +154,22 @@ if [[ "${PACKAGE_SVN_ASSETS}" -eq 1 ]]; then
 	rm -f "${SVN_ASSETS_ZIP}"
 	(
 		cd "${ASSETS_DIR}"
-		zip -r -q "${SVN_ASSETS_ZIP}" .
+		zip -r -q "${SVN_ASSETS_ZIP}" . -x '._*' -x '.DS_Store'
 	)
 	echo "SVN assets zip: ${SVN_ASSETS_ZIP}"
 	echo "Upload contents to plugins.svn.wordpress.org/${PLUGIN_SLUG}/assets/"
+fi
+
+if [[ "${TAG_RELEASE}" -eq 1 ]]; then
+	if git -C "${ROOT}" rev-parse -q --verify "refs/tags/v${VERSION}" >/dev/null; then
+		echo "Tag v${VERSION} already exists."
+	elif [[ -n "$(git -C "${ROOT}" status --porcelain)" ]]; then
+		echo "Refusing to tag v${VERSION}: working tree is not clean." >&2
+		exit 1
+	else
+		git -C "${ROOT}" tag -a "v${VERSION}" -m "${PLUGIN_SLUG} ${VERSION}"
+		echo "Tagged v${VERSION}."
+	fi
 fi
 
 echo "Done."

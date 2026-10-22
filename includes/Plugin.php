@@ -38,6 +38,8 @@ class Plugin {
 
 		self::$registered = true;
 
+		$this->register_plugin_check_excludes();
+
 		$github = new ConnectController();
 		$github->register();
 
@@ -60,18 +62,65 @@ class Plugin {
 				( new DeployController() )->register();
 			}
 		);
-
-		add_action( 'init', array( $this, 'load_textdomain' ) );
 	}
 
 	/**
-	 * Load plugin translations.
+	 * Exclude local-only paths when Plugin Check scans a git working tree.
+	 *
+	 * Release zips never include these (see .distignore). Filters are a no-op
+	 * once the plugin is installed from wordpress.org (no .git directory).
 	 */
-	public function load_textdomain(): void {
-		load_plugin_textdomain(
-			WEBBA_DEPLOY_TEXT_DOMAIN,
-			false,
-			dirname( plugin_basename( WEBBA_DEPLOY_PLUGIN_FILE ) ) . '/languages'
+	private function register_plugin_check_excludes(): void {
+		if ( ! is_dir( WEBBA_DEPLOY_PLUGIN_DIR . '.git' ) ) {
+			return;
+		}
+
+		add_filter(
+			'wp_plugin_check_ignore_directories',
+			static function ( array $directories ): array {
+				return array_values(
+					array_unique(
+						array_merge(
+							$directories,
+							array(
+								'build',
+								'tests',
+								'scripts',
+								'.ai',
+								'.commandcode',
+								'.github',
+								'.idea',
+								'.vscode',
+								'assets/wordpress-org',
+							)
+						)
+					)
+				);
+			}
+		);
+
+		add_filter(
+			'wp_plugin_check_ignore_files',
+			static function ( array $files ): array {
+				return array_values(
+					array_unique(
+						array_merge(
+							$files,
+							array(
+								'.distignore',
+								'.gitignore',
+								'.gitattributes',
+								'build-release.sh',
+								'composer.json',
+								'composer.lock',
+								'phpcs.xml.dist',
+								'phpunit.xml.dist',
+								'PLAN.md',
+							)
+						)
+					)
+				);
+			}
 		);
 	}
 }

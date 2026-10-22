@@ -8,6 +8,7 @@ Upload these to plugins.svn.wordpress.org/webba-deploy/assets/ (not the plugin z
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -118,15 +119,29 @@ def draw_banner(width: int, height: int) -> Image.Image:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing PNGs (default: skip files that already exist).",
+    )
+    args = parser.parse_args()
+
     OUT.mkdir(parents=True, exist_ok=True)
 
     for size in (256, 128):
         path = OUT / f"icon-{size}x{size}.png"
+        if path.exists() and not args.force:
+            print(f"Skipped existing {path.relative_to(ROOT)} (use --force to overwrite)")
+            continue
         draw_download_icon(size).save(path, "PNG")
         print(f"Wrote {path.relative_to(ROOT)}")
 
     for width, height in ((772, 250), (1544, 500)):
         path = OUT / f"banner-{width}x{height}.png"
+        if path.exists() and not args.force:
+            print(f"Skipped existing {path.relative_to(ROOT)} (use --force to overwrite)")
+            continue
         draw_banner(width, height).save(path, "PNG")
         print(f"Wrote {path.relative_to(ROOT)}")
 

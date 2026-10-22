@@ -5,4 +5,5 @@ webba-deploy-config.php
 .vscode/
 *.log
 .DS_Store
+._*
 /build/

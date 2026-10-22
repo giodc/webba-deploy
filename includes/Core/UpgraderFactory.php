@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace WebbaDeploy\Core;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 require_once ABSPATH . 'wp-admin/includes/class-plugin-upgrader.php';
 require_once ABSPATH . 'wp-admin/includes/class-theme-upgrader.php';
@@ -249,15 +253,13 @@ class UpgraderFactory {
 	 * @param string $path File path.
 	 */
 	private function is_valid_zip( string $path ): bool {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-		$handle = fopen( $path, 'rb' );
-
-		if ( false === $handle ) {
+		if ( ! is_readable( $path ) ) {
 			return false;
 		}
 
-		$header = fread( $handle, 4 );
-		fclose( $handle );
+		// Local temp archive only — read magic bytes without WP_Filesystem bootstrap.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$header = file_get_contents( $path, false, null, 0, 4 );
 
 		if ( false === $header || 'PK' !== substr( $header, 0, 2 ) ) {
 			return false;

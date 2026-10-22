@@ -1,36 +1,38 @@
-# Git and CI
+# VCS / tooling (release zip + local Plugin Check via filters)
 .git
 .gitignore
+.gitattributes
+.distignore
 .github
+.ai
+.commandcode
+.idea
+.vscode
+.DS_Store
+._*
 
-# Composer / PHPCS (dev only — plugin has no runtime vendor deps)
+# Composer / PHPCS / tests (dev only — no runtime vendor deps)
 /vendor/
 composer.json
 composer.lock
 phpcs.xml.dist
-
-# Local / IDE
-.idea
-.vscode
-*.log
-.DS_Store
+phpunit.xml.dist
+/tests/
 
 # Secrets and local overrides (never ship)
 webba-deploy-config.php
 
-# Internal planning (not for end users)
+# Internal planning / developer-only docs
 PLAN.md
-
-# Developer-only docs (user docs: github-app-setup.md, push-to-deploy.md ship in docs/)
 docs/development.md
-
-# Pre-submission / release tooling (optional — keep in GitHub repo only)
 docs/wordpress-org-submission.md
 
 # WordPress.org directory assets (SVN assets/ — not the plugin zip)
 assets/wordpress-org/
 
-# Release tooling
+# Release / build tooling
 build/
 build-release.sh
 scripts/
+*.zip
+*.sh

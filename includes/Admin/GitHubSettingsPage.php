@@ -253,7 +253,8 @@ class GitHubSettingsPage {
 		$notice  = sanitize_key( wp_unslash( (string) $_GET['notice'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$message = '';
 		if ( isset( $_GET['message'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			// Display-only notice; sanitized below. Nonce not required for read-only GET flash.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$message = sanitize_text_field( rawurldecode( wp_unslash( (string) $_GET['message'] ) ) );
 		}
 

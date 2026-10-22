@@ -1,8 +1,8 @@
 === Webba Deploy ===
 Contributors: giodc
-Tags: github, deploy, plugin, theme, update, git
+Tags: github, deploy, theme, update, git
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
@@ -27,7 +27,14 @@ Webba Deploy lets site administrators install and update WordPress plugins and t
 
 This plugin connects to **GitHub** (`api.github.com`, `github.com`, `codeload.github.com`) to list repositories, download zipballs, and register or use a GitHub App. No data is sent to third parties other than GitHub.
 
+* Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+* Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
 When you use one-click setup, the plugin stores the GitHub App ID and private key **encrypted** in your WordPress database (`wp_options`). Optional `wp-config.php` constants can override stored credentials for agency setups.
+
+**WordPress update screens**
+
+Webba Deploy does **not** update itself outside wordpress.org. It only injects update offers for plugins and themes that an administrator has explicitly registered to deploy from GitHub, using the same GitHub zipball download path as a manual deploy.
 
 **Requirements**
 

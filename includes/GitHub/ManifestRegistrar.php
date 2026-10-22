@@ -380,7 +380,7 @@ class ManifestRegistrar {
 	}
 
 	/**
-	 * Redirect to GitHub's App installation screen (external; wp_safe_redirect blocks this).
+	 * Redirect to GitHub's App installation screen.
 	 *
 	 * @param string $url GitHub install URL.
 	 */
@@ -394,7 +394,14 @@ class ManifestRegistrar {
 			);
 		}
 
-		wp_redirect( $url );
+		$allow_github = static function ( array $hosts ): array {
+			$hosts[] = 'github.com';
+			return $hosts;
+		};
+
+		add_filter( 'allowed_redirect_hosts', $allow_github );
+		wp_safe_redirect( $url );
+		remove_filter( 'allowed_redirect_hosts', $allow_github );
 		exit;
 	}
 }

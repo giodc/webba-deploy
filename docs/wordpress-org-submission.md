@@ -22,7 +22,9 @@ Legacy GitHub callback URLs (`admin.php?page=…&action=…`) remain supported f
 - [ ] `readme.txt` — `Stable tag:` matches release
 - [ ] `readme.txt` — new `== Changelog ==` section for the release
 - [ ] `readme.txt` — `Tested up to:` reflects latest WordPress you tested against
-- [ ] Git tag created (e.g. `v1.0.0`)
+- [ ] Git tag created (e.g. `v1.0.0`) — `./build-release.sh --tag` does this
+
+`build-release.sh` refuses to build if the header, `WEBBA_DEPLOY_VERSION`, and `Stable tag` disagree.
 
 ## readme.txt
 
@@ -48,14 +50,16 @@ Build with the release script (recommended):
 ./build-release.sh --all
 ```
 
-Outputs:
+Outputs (written **next to** the plugin, not inside it — avoids Plugin Check `compressed_files`):
 
 | File | Purpose |
 |------|---------|
-| `build/webba-deploy-{version}.zip` | Submit to wordpress.org for review |
-| `build/webba-deploy-wordpress-org-assets-{version}.zip` | Upload to SVN `assets/` after approval |
+| `../webba-deploy-dist/webba-deploy-{version}.zip` | Submit to wordpress.org for review |
+| `../webba-deploy-dist/webba-deploy-wordpress-org-assets-{version}.zip` | Upload to SVN `assets/` after approval |
 
-Regenerate directory PNGs only: `./build-release.sh --assets`
+Generate missing directory PNGs: `./build-release.sh --assets`
+
+Overwrite existing directory PNGs (destroys custom artwork): `./build-release.sh --force-assets`
 
 Manual alternative:
 
@@ -66,9 +70,11 @@ cd /tmp && zip -r webba-deploy.zip webba-deploy/
 
 Verify the zip:
 
-- [ ] No `vendor/`, `.git/`, `composer.json`, `PLAN.md`, or `webba-deploy-config.php`
+- [ ] No `vendor/`, `.git/`, `composer.json`, `PLAN.md`, `tests/`, `*.sh`, `._*`, or `webba-deploy-config.php`
 - [ ] Contains `LICENSE`, `readme.txt`, `uninstall.php`, `webba-deploy.php`, `includes/`, `assets/`, `languages/webba-deploy.pot`
 - [ ] Plugin folder name inside zip is `webba-deploy/` (not nested twice)
+
+**Plugin Check tip:** run checks with the plugin active so git-checkout excludes apply, or check the unpacked release zip folder instead of the full source tree.
 
 ## Code quality
 
@@ -128,7 +134,20 @@ plugins.svn.wordpress.org/webba-deploy/
 - [ ] Plugin slug `webba-deploy` available (or adjust slug everywhere if taken)
 - [ ] Upload release zip
 - [ ] Short note to reviewers explaining GitHub App credential storage and external API use
+- [ ] Explain native update hooks: **not** a self-updater; injects offers only for admin-registered GitHub packages (Plugin Check may flag `plugin_updater_detected`)
 - [ ] GPL-compatible — `LICENSE` included, no bundled proprietary code
+
+### Suggested reviewer note
+
+```
+Webba Deploy connects only to GitHub (api.github.com, github.com, codeload.github.com)
+to deploy plugins/themes the site admin registers. Credentials from one-click App setup
+are stored encrypted in wp_options (optional wp-config override).
+
+Plugin Check may report plugin_updater_detected: we hook update_plugins/themes only to
+surface updates for those registered packages — never for Webba Deploy itself, which
+updates via wordpress.org.
+```
 
 ## Post-approval
 

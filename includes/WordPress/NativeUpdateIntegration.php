@@ -1,6 +1,10 @@
 <?php
 /**
- * Surface Webba Deploy updates on Plugins / Themes screens and sync after WP updates.
+ * Surface GitHub updates on Plugins / Themes screens and sync after WP updates.
+ *
+ * This is not a self-updater for Webba Deploy. It only injects update offers for
+ * packages the site admin registered for GitHub deploy (same zipball path as
+ * Dashboard → Deploy). WordPress.org continues to handle updates for this plugin.
  *
  * @package WebbaDeploy
  */

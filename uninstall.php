@@ -9,13 +9,13 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$delete_data = get_option( 'webba_deploy_delete_on_uninstall', false );
+$webba_deploy_delete_data = get_option( 'webba_deploy_delete_on_uninstall', false );
 
-if ( ! $delete_data ) {
+if ( ! $webba_deploy_delete_data ) {
 	return;
 }
 
-$options = array(
+$webba_deploy_options = array(
 	'webba_deploy_github_app_credentials',
 	'webba_deploy_github',
 	'webba_deploy_site_secret',
@@ -26,8 +26,8 @@ $options = array(
 	'webba_deploy_delete_on_uninstall',
 );
 
-foreach ( $options as $option ) {
-	delete_option( $option );
+foreach ( $webba_deploy_options as $webba_deploy_option ) {
+	delete_option( $webba_deploy_option );
 }
 
 global $wpdb;
