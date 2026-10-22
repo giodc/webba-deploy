@@ -18,7 +18,7 @@ if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
 }
 
 if ( ! defined( 'WEBBA_DEPLOY_VERSION' ) ) {
-	define( 'WEBBA_DEPLOY_VERSION', '1.0.1' );
+	define( 'WEBBA_DEPLOY_VERSION', '1.0.2' );
 }
 
 if ( ! function_exists( '__' ) ) {
