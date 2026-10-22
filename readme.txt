@@ -4,7 +4,7 @@ Tags: github, deploy, theme, update, git
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,12 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 
 == Changelog ==
 
+= 1.0.1 =
+* Maintenance release. No functional changes.
+* Refreshed readme and repository documentation.
+* Coding-standard fixes across the GitHub integration classes.
+* CI now publishes a downloadable build artifact on every commit.
+
 = 1.0.0 =
 * First stable release.
 * Self-updates from GitHub Releases (WordPress `Update URI`) with automatic updates enabled by default.
@@ -117,6 +123,9 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 * Initial release: public GitHub plugin and theme deploy, admin dashboard, deploy logging.
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Maintenance release with no functional changes.
 
 = 1.0.0 =
 First stable release. Recommended for production use.
