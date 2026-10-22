@@ -4,7 +4,7 @@ Tags: github, deploy, theme, update, git
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,11 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 
 == Changelog ==
 
+= 1.0.2 =
+* Custom Webba Deploy icon in the admin menu.
+* Plugin icon now appears on **Dashboard → Updates** when an update is available.
+* Maintenance: refreshed CI actions and release tooling.
+
 = 1.0.1 =
 * Maintenance release. No functional changes.
 * Refreshed readme and repository documentation.
@@ -123,6 +128,9 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 * Initial release: public GitHub plugin and theme deploy, admin dashboard, deploy logging.
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Custom admin menu icon and plugin icon on the Updates screen. No functional changes.
 
 = 1.0.1 =
 Maintenance release with no functional changes.
