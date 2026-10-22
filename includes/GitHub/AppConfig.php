@@ -14,8 +14,18 @@ namespace WebbaDeploy\GitHub;
  */
 class AppConfig {
 
+	/**
+	 * Credential store backing the manifest-created App.
+	 *
+	 * @var AppCredentialStore
+	 */
 	private AppCredentialStore $store;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param AppCredentialStore|null $store Optional credential store.
+	 */
 	public function __construct( ?AppCredentialStore $store = null ) {
 		$this->store = $store ?? new AppCredentialStore();
 	}

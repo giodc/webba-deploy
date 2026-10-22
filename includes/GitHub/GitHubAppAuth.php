@@ -18,20 +18,49 @@ namespace WebbaDeploy\GitHub;
  */
 class GitHubAppAuth {
 
+	/**
+	 * App credentials reader.
+	 *
+	 * @var AppConfig
+	 */
 	private AppConfig $config;
+
+	/**
+	 * Installation connection store.
+	 *
+	 * @var ConnectionStore
+	 */
 	private ConnectionStore $connection;
+
+	/**
+	 * Repository access checker.
+	 *
+	 * @var RepositoryLister
+	 */
 	private RepositoryLister $lister;
+
+	/**
+	 * Installation token service.
+	 *
+	 * @var InstallationTokenService
+	 */
 	private InstallationTokenService $tokens;
+
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param AppConfig|null               $config     App credentials.
-	 * @param ConnectionStore|null         $connection Installation store.
-	 * @param RepositoryLister|null        $lister     Repository access checker.
+	 * @param AppConfig|null                $config     App credentials.
+	 * @param ConnectionStore|null          $connection Installation store.
+	 * @param RepositoryLister|null         $lister     Repository access checker.
 	 * @param InstallationTokenService|null $tokens    Installation token service.
-	 * @param ApiClient|null               $api        GitHub API client.
+	 * @param ApiClient|null                $api        GitHub API client.
 	 */
 	public function __construct(
 		?AppConfig $config = null,

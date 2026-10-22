@@ -23,10 +23,26 @@ class CommitChecker {
 
 	private const CACHE_TTL = 300;
 
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
 
+	/**
+	 * Authentication resolver.
+	 *
+	 * @var GitHubAppAuth
+	 */
 	private GitHubAppAuth $auth;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param ApiClient|null     $api  Optional API client.
+	 * @param GitHubAppAuth|null $auth Optional authentication resolver.
+	 */
 	public function __construct( ?ApiClient $api = null, ?GitHubAppAuth $auth = null ) {
 		$this->api  = $api ?? new ApiClient();
 		$this->auth = $auth ?? new GitHubAppAuth();
@@ -249,5 +265,4 @@ class CommitChecker {
 	private function resolve_api_token( array $package ) {
 		return $this->auth->token_for_package( $package );
 	}
-
 }

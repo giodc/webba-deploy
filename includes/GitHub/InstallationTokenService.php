@@ -14,10 +14,34 @@ namespace WebbaDeploy\GitHub;
  */
 class InstallationTokenService {
 
+	/**
+	 * App credentials reader.
+	 *
+	 * @var AppConfig
+	 */
 	private AppConfig $config;
+
+	/**
+	 * JWT generator for App authentication.
+	 *
+	 * @var JwtGenerator
+	 */
 	private JwtGenerator $jwt;
+
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param AppConfig|null    $config Optional App credentials reader.
+	 * @param JwtGenerator|null $jwt    Optional JWT generator.
+	 * @param ApiClient|null    $api    Optional API client.
+	 */
 	public function __construct(
 		?AppConfig $config = null,
 		?JwtGenerator $jwt = null,

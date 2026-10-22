@@ -14,10 +14,34 @@ namespace WebbaDeploy\GitHub;
  */
 class RepositoryLister {
 
+	/**
+	 * Installation token service.
+	 *
+	 * @var InstallationTokenService
+	 */
 	private InstallationTokenService $tokens;
+
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
+
+	/**
+	 * Installation connection store.
+	 *
+	 * @var ConnectionStore
+	 */
 	private ConnectionStore $connection;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param InstallationTokenService|null $tokens     Optional token service.
+	 * @param ApiClient|null                $api        Optional API client.
+	 * @param ConnectionStore|null          $connection Optional connection store.
+	 */
 	public function __construct(
 		?InstallationTokenService $tokens = null,
 		?ApiClient $api = null,
@@ -95,8 +119,9 @@ class RepositoryLister {
 				);
 			}
 
+			$batch_count = count( $batch );
 			++$page;
-		} while ( count( $batch ) === $per_page && $page <= 10 );
+		} while ( $batch_count === $per_page && $page <= 10 );
 
 		usort(
 			$repos,
