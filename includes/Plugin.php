@@ -15,6 +15,7 @@ use WebbaDeploy\GitHub\ConnectController;
 use WebbaDeploy\GitHub\ManifestRegistrar;
 use WebbaDeploy\Rest\DeployController;
 use WebbaDeploy\WordPress\NativeUpdateIntegration;
+use WebbaDeploy\WordPress\SelfUpdate;
 
 /**
  * Registers WordPress hooks.
@@ -47,6 +48,7 @@ class Plugin {
 		$manifest->register();
 
 		( new NativeUpdateIntegration() )->register();
+		( new SelfUpdate() )->register();
 
 		if ( is_admin() ) {
 			$menu = new Menu();

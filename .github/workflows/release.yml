@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Build release zip
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          HEADER_VERSION="$(sed -n 's/^ \* Version:[[:space:]]*//p' webba-deploy.php | head -n 1 | tr -d '[:space:]')"
+
+          if [[ "${TAG_VERSION}" != "${HEADER_VERSION}" ]]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match plugin version ${HEADER_VERSION}." >&2
+            exit 1
+          fi
+
+          chmod +x build-release.sh
+          ./build-release.sh
+
+          cp "../webba-deploy-dist/webba-deploy-${TAG_VERSION}.zip" "../webba-deploy-dist/webba-deploy.zip"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "${GITHUB_REF_NAME}" \
+            "../webba-deploy-dist/webba-deploy.zip" \
+            "../webba-deploy-dist/webba-deploy-${VERSION}.zip" \
+            --title "Webba Deploy ${VERSION}" \
+            --generate-notes
