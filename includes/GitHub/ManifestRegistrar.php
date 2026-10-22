@@ -22,10 +22,34 @@ class ManifestRegistrar {
 	public const ACTION_MANIFEST_CALLBACK = 'webba_deploy_github_manifest_callback';
 	public const ACTION_INSTALL_CALLBACK  = 'webba_deploy_github_install_callback';
 
+	/**
+	 * Credential store for manifest-created Apps.
+	 *
+	 * @var AppCredentialStore
+	 */
 	private AppCredentialStore $credentials;
+
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
+
+	/**
+	 * Public site URL resolver.
+	 *
+	 * @var ManifestSiteUrl
+	 */
 	private ManifestSiteUrl $site_url;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param AppCredentialStore|null $credentials Optional credential store.
+	 * @param ApiClient|null          $api         Optional API client.
+	 * @param ManifestSiteUrl|null    $site_url    Optional site URL resolver.
+	 */
 	public function __construct(
 		?AppCredentialStore $credentials = null,
 		?ApiClient $api = null,
@@ -337,7 +361,10 @@ class ManifestRegistrar {
 	}
 
 	/**
+	 * Validate the OAuth state nonce.
+	 *
 	 * @param string $state State from query string.
+	 * @return bool
 	 */
 	private function verify_state( string $state ): bool {
 		if ( '' === $state ) {

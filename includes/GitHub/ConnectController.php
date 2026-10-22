@@ -17,11 +17,42 @@ use WebbaDeploy\Security\Capability;
  */
 class ConnectController {
 
+	/**
+	 * App credentials reader.
+	 *
+	 * @var AppConfig
+	 */
 	private AppConfig $config;
+
+	/**
+	 * Installation connection store.
+	 *
+	 * @var ConnectionStore
+	 */
 	private ConnectionStore $connection;
+
+	/**
+	 * Installation token service.
+	 *
+	 * @var InstallationTokenService
+	 */
 	private InstallationTokenService $tokens;
+
+	/**
+	 * GitHub API client.
+	 *
+	 * @var ApiClient
+	 */
 	private ApiClient $api;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param AppConfig|null                $config     Optional App credentials reader.
+	 * @param ConnectionStore|null          $connection Optional connection store.
+	 * @param InstallationTokenService|null $tokens     Optional token service.
+	 * @param ApiClient|null                $api        Optional API client.
+	 */
 	public function __construct(
 		?AppConfig $config = null,
 		?ConnectionStore $connection = null,

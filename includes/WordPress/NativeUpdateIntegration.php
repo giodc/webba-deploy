@@ -24,10 +24,39 @@ use WebbaDeploy\GitHub\CommitChecker;
  */
 class NativeUpdateIntegration {
 
+	/**
+	 * Package registry.
+	 *
+	 * @var PackageRepository
+	 */
 	private PackageRepository $packages;
+
+	/**
+	 * Commit comparison service.
+	 *
+	 * @var CommitChecker
+	 */
 	private CommitChecker $commits;
+
+	/**
+	 * GitHub archive downloader.
+	 *
+	 * @var ArchiveDownloader
+	 */
 	private ArchiveDownloader $downloader;
+
+	/**
+	 * Deploy service.
+	 *
+	 * @var DeployService
+	 */
 	private DeployService $deploy;
+
+	/**
+	 * Upgrader factory.
+	 *
+	 * @var UpgraderFactory
+	 */
 	private UpgraderFactory $upgrader;
 
 	/**
@@ -37,6 +66,15 @@ class NativeUpdateIntegration {
 	 */
 	private ?array $pending_package = null;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param PackageRepository|null $packages   Optional package registry.
+	 * @param CommitChecker|null     $commits    Optional commit checker.
+	 * @param ArchiveDownloader|null $downloader Optional archive downloader.
+	 * @param DeployService|null     $deploy     Optional deploy service.
+	 * @param UpgraderFactory|null   $upgrader   Optional upgrader factory.
+	 */
 	public function __construct(
 		?PackageRepository $packages = null,
 		?CommitChecker $commits = null,
@@ -188,7 +226,7 @@ class NativeUpdateIntegration {
 	/**
 	 * Ensure GitHub zipballs install into the configured folder slug.
 	 *
-	 * @param bool|mixed       $response   Whether to continue install.
+	 * @param bool|mixed           $response   Whether to continue install.
 	 * @param array<string, mixed> $hook_extra Hook extra.
 	 * @return bool|mixed
 	 */

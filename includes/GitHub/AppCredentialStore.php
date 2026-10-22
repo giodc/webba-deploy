@@ -123,6 +123,8 @@ class AppCredentialStore {
 	}
 
 	/**
+	 * Read the stored manifest credentials.
+	 *
 	 * @return array<string, mixed>|null
 	 */
 	private function get_raw(): ?array {

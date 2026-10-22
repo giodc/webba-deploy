@@ -122,6 +122,9 @@ class ManifestSiteUrl {
 
 	/**
 	 * Ensure a manifest URL is absolute HTTPS and passes basic validation.
+	 *
+	 * @param string $url URL candidate.
+	 * @return string
 	 */
 	public function sanitize_manifest_url( string $url ): string {
 		$url = esc_url_raw( $url );
@@ -135,6 +138,10 @@ class ManifestSiteUrl {
 
 	/**
 	 * Replace scheme/host/port on a WordPress URL with the public site origin.
+	 *
+	 * @param string $url             WordPress URL.
+	 * @param string $public_homepage Public site homepage URL.
+	 * @return string
 	 */
 	private function replace_url_origin( string $url, string $public_homepage ): string {
 		$public_parts = wp_parse_url( untrailingslashit( $public_homepage ) );
@@ -159,7 +166,10 @@ class ManifestSiteUrl {
 	}
 
 	/**
+	 * Normalize a URL candidate.
+	 *
 	 * @param string $url Raw URL candidate.
+	 * @return string
 	 */
 	private function normalize( string $url ): string {
 		$url = trim( $url );

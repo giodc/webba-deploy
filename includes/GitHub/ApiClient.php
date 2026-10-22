@@ -30,9 +30,9 @@ class ApiClient {
 	/**
 	 * Perform POST request against GitHub API.
 	 *
-	 * @param string                   $path  API path.
+	 * @param string                    $path  API path.
 	 * @param array<string, mixed>|null $body  JSON body, or null for no body.
-	 * @param string|null              $token Bearer token.
+	 * @param string|null               $token Bearer token.
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function post( string $path, ?array $body = null, ?string $token = null ) {
@@ -61,10 +61,10 @@ class ApiClient {
 	/**
 	 * HTTP request helper.
 	 *
-	 * @param string                   $method HTTP method.
-	 * @param string                   $path   API path.
+	 * @param string                    $method HTTP method.
+	 * @param string                    $path   API path.
 	 * @param array<string, mixed>|null $body   JSON body for POST.
-	 * @param string|null              $token  Bearer token.
+	 * @param string|null               $token  Bearer token.
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	private function request( string $method, string $path, ?array $body, ?string $token ) {

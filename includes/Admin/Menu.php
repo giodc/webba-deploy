@@ -118,6 +118,7 @@ class Menu {
 		global $submenu;
 
 		if ( isset( $submenu[ self::SLUG_DASHBOARD ][0][0] ) ) {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Renaming the auto-generated submenu label.
 			$submenu[ self::SLUG_DASHBOARD ][0][0] = __( 'Dashboard', 'webba-deploy' );
 		}
 	}
@@ -226,7 +227,7 @@ class Menu {
 
 		if ( $config->uses_wp_config() ) {
 			wp_safe_redirect(
-				Menu::github_settings_url(
+				self::github_settings_url(
 					array(
 						'notice'  => 'error',
 						'message' => __( 'App credentials are defined in wp-config.php and cannot be removed here.', 'webba-deploy' ),
@@ -241,7 +242,7 @@ class Menu {
 		$github->reset_app_credentials();
 
 		wp_safe_redirect(
-			Menu::github_settings_url(
+			self::github_settings_url(
 				array(
 					'notice' => 'reset',
 				)
@@ -260,7 +261,7 @@ class Menu {
 		( new \WebbaDeploy\GitHub\ConnectController() )->disconnect();
 
 		wp_safe_redirect(
-			Menu::github_settings_url(
+			self::github_settings_url(
 				array(
 					'notice'  => 'disconnected',
 					'message' => __( 'GitHub App disconnected.', 'webba-deploy' ),
