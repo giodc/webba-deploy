@@ -47,6 +47,28 @@ class Menu {
 	}
 
 	/**
+	 * Admin menu icon: the Webba Deploy mark as a base64-encoded SVG.
+	 */
+	private function menu_icon(): string {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#a7aaad">'
+			. '<defs><mask id="cut"><rect width="20" height="20" fill="#fff"/><g fill="#000">'
+			. '<circle cx="2.9" cy="8.5" r="0.72"/><circle cx="2.9" cy="11.5" r="0.72"/><circle cx="5.1" cy="9.1" r="0.72"/>'
+			. '<path d="M2.9 8.5v3M5.1 9.1L2.9 11.5" stroke="#000" stroke-width="1.05" stroke-linecap="round"/>'
+			. '<circle cx="14.5" cy="7.35" r="0.3"/><circle cx="16.4" cy="7.35" r="0.3"/><circle cx="18.3" cy="7.35" r="0.3"/>'
+			. '<path d="M13.3 8.3h6.2" stroke="#000" stroke-width="0.65"/>'
+			. '<path d="M16.4 12.4v-2M15.6 11.3l0.8-1 0.8 1" stroke="#000" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/>'
+			. '</g></mask></defs>'
+			. '<g mask="url(#cut)">'
+			. '<rect x="1.2" y="7.2" width="5.6" height="5.6" rx="1.4" transform="rotate(45 4 10)"/>'
+			. '<path d="M6.8 13.2c1.9 0 3.5-.9 4.5-2.7" fill="none" stroke="#a7aaad" stroke-width="1.6" stroke-linecap="round"/>'
+			. '<path d="M10.7 8.8L13.1 10l-2.1 1.7z"/>'
+			. '<rect x="13.2" y="6.4" width="6.4" height="7.2" rx="1.3"/>'
+			. '</g></svg>';
+
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+	}
+
+	/**
 	 * Add menu pages.
 	 */
 	public function add_menus(): void {
@@ -60,7 +82,7 @@ class Menu {
 			'manage_options',
 			self::SLUG_DASHBOARD,
 			array( $dashboard, 'render' ),
-			'dashicons-download',
+			$this->menu_icon(),
 			80
 		);
 
