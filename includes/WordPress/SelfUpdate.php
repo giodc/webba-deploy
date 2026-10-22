@@ -63,21 +63,26 @@ class SelfUpdate {
 			'version' => $release['version'],
 			'package' => $release['package'],
 			'url'     => 'https://' . self::HOST . '/' . self::REPO,
+			'icons'   => array(
+				'1x' => $this->asset_url( $release['tag'], 'icon-128x128.png' ),
+				'2x' => $this->asset_url( $release['tag'], 'icon-256x256.png' ),
+			),
 		);
 	}
 
 	/**
 	 * Latest published release, cached to respect GitHub rate limits.
 	 *
-	 * @return array{version: string, package: string}|null
+	 * @return array{version: string, package: string, tag: string}|null
 	 */
 	private function latest_release(): ?array {
 		$cached = get_transient( self::CACHE_KEY );
 
-		if ( is_array( $cached ) && isset( $cached['version'], $cached['package'] ) ) {
+		if ( is_array( $cached ) && isset( $cached['version'], $cached['package'], $cached['tag'] ) ) {
 			return array(
 				'version' => (string) $cached['version'],
 				'package' => (string) $cached['package'],
+				'tag'     => (string) $cached['tag'],
 			);
 		}
 
@@ -102,10 +107,10 @@ class SelfUpdate {
 			return null;
 		}
 
-		$tag = isset( $data['tag_name'] ) ? (string) $data['tag_name'] : '';
-		$tag = (string) preg_replace( '/^[vV]/', '', $tag );
+		$raw_tag = isset( $data['tag_name'] ) ? (string) $data['tag_name'] : '';
+		$version = (string) preg_replace( '/^[vV]/', '', $raw_tag );
 
-		if ( '' === $tag ) {
+		if ( '' === $version ) {
 			return null;
 		}
 
@@ -116,8 +121,9 @@ class SelfUpdate {
 		}
 
 		$release = array(
-			'version' => $tag,
+			'version' => $version,
 			'package' => $package,
+			'tag'     => $raw_tag,
 		);
 
 		set_transient( self::CACHE_KEY, $release, self::CACHE_TTL );
@@ -155,6 +161,21 @@ class SelfUpdate {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Public URL for a directory asset at a given tag.
+	 *
+	 * @param string $ref  Git tag.
+	 * @param string $file Asset filename.
+	 */
+	private function asset_url( string $ref, string $file ): string {
+		return sprintf(
+			'https://raw.githubusercontent.com/%s/%s/assets/wordpress-org/%s',
+			self::REPO,
+			rawurlencode( $ref ),
+			$file
+		);
 	}
 
 	/**
