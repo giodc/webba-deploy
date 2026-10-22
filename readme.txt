@@ -32,9 +32,9 @@ This plugin connects to **GitHub** (`api.github.com`, `github.com`, `codeload.gi
 
 When you use one-click setup, the plugin stores the GitHub App ID and private key **encrypted** in your WordPress database (`wp_options`). Optional `wp-config.php` constants can override stored credentials for agency setups.
 
-**WordPress update screens**
+**Updates**
 
-Webba Deploy does **not** update itself outside wordpress.org. It only injects update offers for plugins and themes that an administrator has explicitly registered to deploy from GitHub, using the same GitHub zipball download path as a manual deploy.
+Webba Deploy updates itself from its own GitHub Releases using the WordPress `Update URI` mechanism, and opts into automatic updates on activation. It also injects update offers for plugins and themes that an administrator has explicitly registered to deploy from GitHub, using the same GitHub zipball download path as a manual deploy.
 
 **Requirements**
 
@@ -68,6 +68,14 @@ Public GitHub repos work on local sites. One-click GitHub App setup requires a p
 
 Read-only **Contents** and **Metadata**. Repository access is limited to repos you select when installing the App on GitHub.
 
+= How does Webba Deploy update itself? =
+
+From its public GitHub repository. WordPress compares the installed version with the latest GitHub Release and installs the `webba-deploy.zip` release asset. Automatic updates are enabled on activation and can be turned off on the **Plugins** screen.
+
+= Does updating Webba Deploy require a GitHub token? =
+
+No. The repository is public, and update checks use unauthenticated GitHub API requests cached for six hours.
+
 = Is push-to-deploy secure? =
 
 Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deploy → Push-to-deploy** if exposed, and use HTTPS only.
@@ -82,6 +90,7 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 
 = 1.0.0 =
 * First stable release.
+* Self-updates from GitHub Releases (WordPress `Update URI`) with automatic updates enabled by default.
 * Public and private GitHub deploy with read-only GitHub App (one-click setup or wp-config override).
 * Native WordPress plugin and theme update integration.
 * Push-to-deploy REST endpoint with rotatable site secret.

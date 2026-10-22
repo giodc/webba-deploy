@@ -22,6 +22,9 @@ phpunit.xml.dist
 # Secrets and local overrides (never ship)
 webba-deploy-config.php
 
+# Repository docs (GitHub only)
+README.md
+
 # Internal planning / developer-only docs
 PLAN.md
 docs/development.md

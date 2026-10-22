@@ -1,7 +1,8 @@
 <?php
 /**
  * Plugin Name:       Webba Deploy
- * Plugin URI:        https://wordpress.org/plugins/webba-deploy/
+ * Plugin URI:        https://github.com/giodc/webba-deploy
+ * Update URI:        https://github.com/giodc/webba-deploy
  * Description:       Deploy plugins and themes from GitHub — public or private — with one-click installs and push-to-deploy.
  * Version:           1.0.0
  * Requires at least: 6.0
@@ -61,9 +62,33 @@ spl_autoload_register(
 );
 
 /**
+ * Opt this plugin into WordPress auto-updates once, unless the site removes it later.
+ */
+function webba_deploy_enable_auto_update(): void {
+	if ( get_option( 'webba_deploy_auto_update_default' ) ) {
+		return;
+	}
+
+	update_option( 'webba_deploy_auto_update_default', 1, false );
+
+	$plugin = 'webba-deploy/webba-deploy.php';
+	$auto   = (array) get_site_option( 'auto_update_plugins', array() );
+
+	if ( in_array( $plugin, $auto, true ) ) {
+		return;
+	}
+
+	$auto[] = $plugin;
+
+	update_site_option( 'auto_update_plugins', array_values( array_unique( $auto ) ) );
+}
+
+/**
  * Plugin activation.
  */
 function webba_deploy_activate(): void {
+	webba_deploy_enable_auto_update();
+
 	if ( ! get_option( 'webba_deploy_site_secret' ) ) {
 		update_option( 'webba_deploy_site_secret', wp_generate_password( 64, true, true ), false );
 	}
@@ -100,3 +125,4 @@ function webba_deploy_init(): void {
 }
 
 add_action( 'plugins_loaded', 'webba_deploy_init' );
+add_action( 'admin_init', 'webba_deploy_enable_auto_update' );
