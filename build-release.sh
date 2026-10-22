@@ -7,9 +7,7 @@
 #
 # Usage:
 #   ./build-release.sh                 # plugin zip only
-#   ./build-release.sh --assets        # generate missing wordpress.org PNGs
-#   ./build-release.sh --force-assets  # overwrite existing PNGs
-#   ./build-release.sh --all           # missing assets + plugin zip + SVN assets zip
+#   ./build-release.sh --all           # plugin zip + SVN assets zip
 #   ./build-release.sh --tag           # create git tag v{version} after building (clean tree only)
 #
 set -euo pipefail
@@ -23,27 +21,19 @@ DISTIGNORE="${ROOT}/.distignore"
 ASSETS_DIR="${ROOT}/assets/wordpress-org"
 LEGACY_BUILD="${ROOT}/build"
 
-ASSETS_MODE="none"
 PACKAGE_SVN_ASSETS=0
 TAG_RELEASE=0
 
 for arg in "$@"; do
 	case "$arg" in
-		--assets)
-			ASSETS_MODE="missing"
-			;;
-		--force-assets)
-			ASSETS_MODE="force"
-			;;
 		--all)
-			ASSETS_MODE="missing"
 			PACKAGE_SVN_ASSETS=1
 			;;
 		--tag)
 			TAG_RELEASE=1
 			;;
 		--help|-h)
-			echo "Usage: $0 [--assets|--force-assets] [--all] [--tag]"
+			echo "Usage: $0 [--all] [--tag]"
 			exit 0
 			;;
 		*)
@@ -105,14 +95,6 @@ SVN_ASSETS_ZIP="${BUILD_DIR}/${PLUGIN_SLUG}-wordpress-org-assets-${VERSION}.zip"
 if [[ -d "${LEGACY_BUILD}" ]]; then
 	echo "Removing legacy ${LEGACY_BUILD}/ (output is now ${BUILD_DIR}/)…"
 	rm -rf "${LEGACY_BUILD}"
-fi
-
-if [[ "${ASSETS_MODE}" == "force" ]]; then
-	echo "Regenerating WordPress.org assets…"
-	python3 "${ROOT}/scripts/generate-wordpress-org-assets.py" --force
-elif [[ "${ASSETS_MODE}" == "missing" || ! -f "${ASSETS_DIR}/icon-256x256.png" ]]; then
-	echo "Generating missing WordPress.org assets…"
-	python3 "${ROOT}/scripts/generate-wordpress-org-assets.py"
 fi
 
 echo "Building ${PLUGIN_SLUG} ${VERSION}…"
