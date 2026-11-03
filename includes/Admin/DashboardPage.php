@@ -11,6 +11,7 @@ namespace WebbaDeploy\Admin;
 
 use WebbaDeploy\Core\DeployUrl;
 use WebbaDeploy\Core\PackageRepository;
+use WebbaDeploy\GitHub\BranchLister;
 use WebbaDeploy\GitHub\CommitChecker;
 use WebbaDeploy\Logging\Logger;
 use WebbaDeploy\Security\Capability;
@@ -27,10 +28,10 @@ class DashboardPage {
 	public function render(): void {
 		Capability::require_manage_settings();
 
-		$plugins = ( new PackageRepository() )->all( PackageRepository::TYPE_PLUGIN );
-		$themes  = ( new PackageRepository() )->all( PackageRepository::TYPE_THEME );
-		$logs    = ( new Logger() )->get_entries( 20 );
-		$secret  = ( new SiteSecret() )->get();
+		$plugins       = ( new PackageRepository() )->all( PackageRepository::TYPE_PLUGIN );
+		$themes        = ( new PackageRepository() )->all( PackageRepository::TYPE_THEME );
+		$logs          = ( new Logger() )->get_entries( 20 );
+		$branch_lister = new BranchLister();
 
 		$this->render_notices();
 		?>
@@ -59,17 +60,19 @@ class DashboardPage {
 				</form>
 			</div>
 
-			<p>
-				<a href="<?php echo esc_url( $this->page_url( Menu::SLUG_SETTINGS ) ); ?>">
-					<?php echo esc_html__( 'Manage push-to-deploy secret', 'webba-deploy' ); ?>
-				</a>
-			</p>
+			<?php if ( Capability::can_deploy_any() ) : ?>
+				<p>
+					<a href="<?php echo esc_url( $this->page_url( Menu::SLUG_SETTINGS ) ); ?>">
+						<?php echo esc_html__( 'Manage push-to-deploy secrets', 'webba-deploy' ); ?>
+					</a>
+				</p>
+			<?php endif; ?>
 
 			<h2><?php echo esc_html__( 'Plugins', 'webba-deploy' ); ?></h2>
-			<?php $this->render_package_grid( PackageRepository::TYPE_PLUGIN, $plugins, $secret ); ?>
+			<?php $this->render_package_grid( PackageRepository::TYPE_PLUGIN, $plugins, $branch_lister ); ?>
 
 			<h2><?php echo esc_html__( 'Themes', 'webba-deploy' ); ?></h2>
-			<?php $this->render_package_grid( PackageRepository::TYPE_THEME, $themes, $secret ); ?>
+			<?php $this->render_package_grid( PackageRepository::TYPE_THEME, $themes, $branch_lister ); ?>
 
 			<h2><?php echo esc_html__( 'Recent activity', 'webba-deploy' ); ?></h2>
 			<?php $this->render_logs( $logs ); ?>
@@ -112,6 +115,9 @@ class DashboardPage {
 				case 'deleted':
 					$message = __( 'Package removed.', 'webba-deploy' );
 					break;
+				case 'branch_updated':
+					$message = __( 'Branch updated. Deploy the package to switch this site to the new branch.', 'webba-deploy' );
+					break;
 				case 'updates_checked':
 					$message = __( 'Update check completed. GitHub and WordPress update lists were refreshed.', 'webba-deploy' );
 					break;
@@ -132,9 +138,9 @@ class DashboardPage {
 	 *
 	 * @param string                           $type     Package type.
 	 * @param array<int, array<string, mixed>> $packages Packages.
-	 * @param string                           $secret   Site deploy secret.
+	 * @param BranchLister                     $branch_lister Branch lister.
 	 */
-	private function render_package_grid( string $type, array $packages, string $secret ): void {
+	private function render_package_grid( string $type, array $packages, BranchLister $branch_lister ): void {
 		if ( empty( $packages ) ) {
 			echo '<p>' . esc_html__( 'No packages yet.', 'webba-deploy' ) . '</p>';
 			return;
@@ -142,7 +148,7 @@ class DashboardPage {
 		?>
 		<div class="webba-deploy-grid" role="list">
 			<?php foreach ( $packages as $package ) : ?>
-				<?php $this->render_package_card( $type, $package, $secret ); ?>
+				<?php $this->render_package_card( $type, $package, $branch_lister ); ?>
 			<?php endforeach; ?>
 		</div>
 		<?php
@@ -151,32 +157,50 @@ class DashboardPage {
 	/**
 	 * Single package card.
 	 *
-	 * @param string               $type    Package type.
-	 * @param array<string, mixed> $package Package data.
-	 * @param string               $secret  Site deploy secret.
+	 * @param string               $type     Package type.
+	 * @param array<string, mixed> $package  Package data.
+	 * @param BranchLister         $branch_lister Branch lister.
 	 */
-	private function render_package_card( string $type, array $package, string $secret ): void {
-		$id     = esc_attr( (string) ( $package['id'] ?? '' ) );
-		$slug   = esc_html( (string) ( $package['slug'] ?? '' ) );
-		$owner  = esc_html( (string) ( $package['owner'] ?? '' ) );
-		$repo   = esc_html( (string) ( $package['repo'] ?? '' ) );
-		$branch = esc_html( (string) ( $package['branch'] ?? 'main' ) );
-		$last   = isset( $package['last_deploy'] ) && is_array( $package['last_deploy'] ) ? $package['last_deploy'] : array();
-		$status = isset( $last['status'] ) ? (string) $last['status'] : '';
-		$time   = isset( $last['time'] ) ? (string) $last['time'] : '';
-		$msg    = isset( $last['message'] ) ? (string) $last['message'] : '';
+	private function render_package_card( string $type, array $package, BranchLister $branch_lister ): void {
+		$id         = esc_attr( (string) ( $package['id'] ?? '' ) );
+		$slug       = esc_html( (string) ( $package['slug'] ?? '' ) );
+		$owner      = esc_html( (string) ( $package['owner'] ?? '' ) );
+		$repo       = esc_html( (string) ( $package['repo'] ?? '' ) );
+		$branch_raw = (string) ( $package['branch'] ?? 'main' );
+		$branch     = esc_html( $branch_raw );
+		$last       = isset( $package['last_deploy'] ) && is_array( $package['last_deploy'] ) ? $package['last_deploy'] : array();
+		$status     = isset( $last['status'] ) ? (string) $last['status'] : '';
+		$time       = isset( $last['time'] ) ? (string) $last['time'] : '';
+		$msg        = isset( $last['message'] ) ? (string) $last['message'] : '';
 
-		$can_deploy  = Capability::can_deploy( $type );
-		$deploy_url  = DeployUrl::for_package( $type, (string) ( $package['slug'] ?? '' ), $secret );
-		$input_id    = 'webba-deploy-url-' . (string) ( $package['id'] ?? '' );
-		$installed     = PackageRepository::is_installed_on_disk( $type, (string) ( $package['slug'] ?? '' ) );
+		$can_deploy     = Capability::can_deploy( $type );
+		$branch_options = array();
+
+		if ( $can_deploy ) {
+			$fetched = $branch_lister->list_branches( $package );
+
+			if ( ! is_wp_error( $fetched ) && ! empty( $fetched ) ) {
+				$branch_options = $fetched;
+
+				if ( ! in_array( $branch_raw, $branch_options, true ) ) {
+					$branch_options[] = $branch_raw;
+					sort( $branch_options, SORT_NATURAL | SORT_FLAG_CASE );
+				}
+			}
+		}
+
+		$deploy_url      = DeployUrl::for_package( $type, (string) ( $package['slug'] ?? '' ) );
+		$input_id        = 'webba-deploy-url-' . (string) ( $package['id'] ?? '' );
+		$secret_input_id = 'webba-deploy-secret-' . (string) ( $package['id'] ?? '' );
+		$secret          = $can_deploy ? ( new SiteSecret() )->get( $type ) : '';
+		$installed       = PackageRepository::is_installed_on_disk( $type, (string) ( $package['slug'] ?? '' ) );
 		$update_status = ( new CommitChecker() )->get_update_status( $package, $installed );
 		$local_commit  = isset( $last['commit'] ) && is_string( $last['commit'] ) ? substr( (string) $last['commit'], 0, 7 ) : '';
 		$visibility    = (string) ( $package['visibility'] ?? 'public' );
 		$access_label  = 'private' === $visibility
 			? __( 'Private', 'webba-deploy' )
 			: __( 'Public', 'webba-deploy' );
-		$repo_url = sprintf( 'https://github.com/%s/%s', $package['owner'] ?? '', $package['repo'] ?? '' );
+		$repo_url      = sprintf( 'https://github.com/%s/%s', $package['owner'] ?? '', $package['repo'] ?? '' );
 		?>
 		<article class="webba-deploy-card" role="listitem">
 			<header class="webba-deploy-card__header">
@@ -195,8 +219,52 @@ class DashboardPage {
 				</dd>
 				<dt><?php echo esc_html__( 'Access', 'webba-deploy' ); ?></dt>
 				<dd><?php echo esc_html( $access_label ); ?></dd>
-				<dt><?php echo esc_html__( 'Branch', 'webba-deploy' ); ?></dt>
-				<dd><?php echo $branch; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></dd>
+				<dt>
+					<?php if ( $can_deploy ) : ?>
+						<label for="webba-deploy-branch-<?php echo esc_attr( (string) ( $package['id'] ?? '' ) ); ?>">
+							<?php echo esc_html__( 'Branch', 'webba-deploy' ); ?>
+						</label>
+					<?php else : ?>
+						<?php echo esc_html__( 'Branch', 'webba-deploy' ); ?>
+					<?php endif; ?>
+				</dt>
+				<dd>
+					<?php if ( $can_deploy ) : ?>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="webba-deploy-branch-form">
+							<?php wp_nonce_field( 'webba_deploy_update_branch' ); ?>
+							<input type="hidden" name="action" value="webba_deploy_action" />
+							<input type="hidden" name="webba_deploy_action" value="update_branch" />
+							<input type="hidden" name="package_type" value="<?php echo esc_attr( $type ); ?>" />
+							<input type="hidden" name="package_id" value="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
+							<?php if ( ! empty( $branch_options ) ) : ?>
+								<select
+									name="branch"
+									id="webba-deploy-branch-<?php echo esc_attr( (string) ( $package['id'] ?? '' ) ); ?>"
+									class="webba-deploy-branch-input"
+								>
+									<?php foreach ( $branch_options as $branch_option ) : ?>
+										<option value="<?php echo esc_attr( $branch_option ); ?>" <?php selected( $branch_option, $branch_raw ); ?>>
+											<?php echo esc_html( $branch_option ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							<?php else : ?>
+								<input
+									type="text"
+									name="branch"
+									id="webba-deploy-branch-<?php echo esc_attr( (string) ( $package['id'] ?? '' ) ); ?>"
+									class="webba-deploy-branch-input"
+									value="<?php echo esc_attr( $branch_raw ); ?>"
+								/>
+							<?php endif; ?>
+							<button type="submit" class="button button-small">
+								<?php echo esc_html__( 'Change', 'webba-deploy' ); ?>
+							</button>
+						</form>
+					<?php else : ?>
+						<?php echo $branch; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php endif; ?>
+				</dd>
 				<?php if ( $local_commit ) : ?>
 					<dt><?php echo esc_html__( 'Commit', 'webba-deploy' ); ?></dt>
 					<dd><code><?php echo esc_html( $local_commit ); ?></code></dd>
@@ -216,28 +284,54 @@ class DashboardPage {
 				</dd>
 			</dl>
 
-			<div class="webba-deploy-card__push">
-				<label class="webba-deploy-card__label" for="<?php echo esc_attr( $input_id ); ?>">
-					<?php echo esc_html__( 'Push-to-deploy URL', 'webba-deploy' ); ?>
-				</label>
-				<div class="webba-deploy-push-url">
-					<input
-						type="text"
-						readonly
-						class="large-text code webba-deploy-copy-input"
-						id="<?php echo esc_attr( $input_id ); ?>"
-						value="<?php echo esc_url( $deploy_url ); ?>"
-					/>
-					<button
-						type="button"
-						class="button button-small webba-deploy-copy"
-						data-copy-target="<?php echo esc_attr( $input_id ); ?>"
-						data-copied-label="<?php echo esc_attr__( 'Copied!', 'webba-deploy' ); ?>"
-					>
-						<?php echo esc_html__( 'Copy', 'webba-deploy' ); ?>
-					</button>
+			<?php if ( $can_deploy ) : ?>
+				<div class="webba-deploy-card__push">
+					<label class="webba-deploy-card__label" for="<?php echo esc_attr( $input_id ); ?>">
+						<?php echo esc_html__( 'Deploy URL', 'webba-deploy' ); ?>
+					</label>
+					<div class="webba-deploy-push-url">
+						<input
+							type="text"
+							readonly
+							class="large-text code webba-deploy-copy-input"
+							id="<?php echo esc_attr( $input_id ); ?>"
+							value="<?php echo esc_url( $deploy_url ); ?>"
+						/>
+						<button
+							type="button"
+							class="button button-small webba-deploy-copy"
+							data-copy-target="<?php echo esc_attr( $input_id ); ?>"
+							data-copied-label="<?php echo esc_attr__( 'Copied!', 'webba-deploy' ); ?>"
+						>
+							<?php echo esc_html__( 'Copy', 'webba-deploy' ); ?>
+						</button>
+					</div>
+
+					<label class="webba-deploy-card__label webba-deploy-card__label--secret" for="<?php echo esc_attr( $secret_input_id ); ?>">
+						<?php echo esc_html__( 'Secret', 'webba-deploy' ); ?>
+					</label>
+					<div class="webba-deploy-push-url">
+						<input
+							type="text"
+							readonly
+							class="large-text code webba-deploy-copy-input"
+							id="<?php echo esc_attr( $secret_input_id ); ?>"
+							value="<?php echo esc_attr( $secret ); ?>"
+						/>
+						<button
+							type="button"
+							class="button button-small webba-deploy-copy"
+							data-copy-target="<?php echo esc_attr( $secret_input_id ); ?>"
+							data-copied-label="<?php echo esc_attr__( 'Copied!', 'webba-deploy' ); ?>"
+						>
+							<?php echo esc_html__( 'Copy', 'webba-deploy' ); ?>
+						</button>
+					</div>
+					<p class="description">
+						<?php echo esc_html__( 'Send the secret in the X-Webba-Deploy-Secret header (recommended). The legacy secret query parameter is still accepted.', 'webba-deploy' ); ?>
+					</p>
 				</div>
-			</div>
+			<?php endif; ?>
 
 			<footer class="webba-deploy-card__actions">
 				<?php if ( $can_deploy ) : ?>

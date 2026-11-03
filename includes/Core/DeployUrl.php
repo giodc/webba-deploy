@@ -24,9 +24,12 @@ class DeployUrl {
 	/**
 	 * Full deploy URL for a package.
 	 *
+	 * The secret is normally sent in the X-Webba-Deploy-Secret header. Passing
+	 * it here embeds it in the query string for backwards compatibility.
+	 *
 	 * @param string      $type   plugin|theme.
 	 * @param string      $slug   Package folder slug.
-	 * @param string|null $secret Site secret; omit to build a template without secret.
+	 * @param string|null $secret Legacy query-string secret; omit for header auth.
 	 */
 	public static function for_package( string $type, string $slug, ?string $secret = null ): string {
 		$args = array(

@@ -162,6 +162,9 @@ class Menu {
 			case 'delete':
 				$this->handle_delete();
 				break;
+			case 'update_branch':
+				$this->handle_update_branch();
+				break;
 			case 'add_package':
 				$this->handle_add_package();
 				break;
@@ -204,6 +207,20 @@ class Menu {
 			! empty( $_POST['delete_on_uninstall'] ) ? 1 : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			false
 		);
+
+		if ( Capability::can_deploy_any() ) {
+			$plugin_file  = 'webba-deploy/webba-deploy.php';
+			$auto_plugins = (array) get_site_option( 'auto_update_plugins', array() );
+			$wants_auto   = ! empty( $_POST['auto_update'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+			if ( $wants_auto && ! in_array( $plugin_file, $auto_plugins, true ) ) {
+				$auto_plugins[] = $plugin_file;
+			} elseif ( ! $wants_auto ) {
+				$auto_plugins = array_diff( $auto_plugins, array( $plugin_file ) );
+			}
+
+			update_site_option( 'auto_update_plugins', array_values( array_unique( $auto_plugins ) ) );
+		}
 
 		wp_safe_redirect(
 			add_query_arg(
@@ -294,20 +311,42 @@ class Menu {
 	}
 
 	/**
-	 * Rotate push-to-deploy site secret.
+	 * Rotate push-to-deploy secret for a package type.
 	 */
 	private function handle_rotate_secret(): void {
 		check_admin_referer( 'webba_deploy_rotate_secret' );
-		Capability::require_manage_settings();
 
-		( new \WebbaDeploy\Security\SiteSecret() )->rotate();
+		$type = isset( $_POST['package_type'] ) ? sanitize_key( wp_unslash( (string) $_POST['package_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		if ( ! in_array( $type, array( \WebbaDeploy\Core\PackageRepository::TYPE_PLUGIN, \WebbaDeploy\Core\PackageRepository::TYPE_THEME ), true ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'    => self::SLUG_SETTINGS,
+						'notice'  => 'error',
+						'message' => rawurlencode( __( 'Invalid package type.', 'webba-deploy' ) ),
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		Capability::require_deploy( $type );
+
+		$secret = ( new \WebbaDeploy\Security\SiteSecret() )->rotate( $type );
+
+		set_transient(
+			'webba_deploy_new_secret_' . $type . '_' . get_current_user_id(),
+			$secret,
+			5 * MINUTE_IN_SECONDS
+		);
 
 		wp_safe_redirect(
 			add_query_arg(
 				array(
-					'page'         => self::SLUG_SETTINGS,
-					'notice'       => 'rotated',
-					'show_secret'  => '1',
+					'page'   => self::SLUG_SETTINGS,
+					'notice' => 'rotated',
 				),
 				admin_url( 'admin.php' )
 			)
@@ -350,6 +389,63 @@ class Menu {
 	}
 
 	/**
+	 * Update the Git branch tracked by a package.
+	 */
+	private function handle_update_branch(): void {
+		check_admin_referer( 'webba_deploy_update_branch' );
+
+		$type = isset( $_POST['package_type'] ) ? sanitize_key( wp_unslash( (string) $_POST['package_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$id   = isset( $_POST['package_id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['package_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		if ( ! in_array( $type, array( \WebbaDeploy\Core\PackageRepository::TYPE_PLUGIN, \WebbaDeploy\Core\PackageRepository::TYPE_THEME ), true ) || '' === $id ) {
+			wp_safe_redirect( $this->redirect_url( 'error', __( 'Invalid package.', 'webba-deploy' ) ) );
+			exit;
+		}
+
+		Capability::require_deploy( $type );
+
+		$repo    = new \WebbaDeploy\Core\PackageRepository();
+		$package = $repo->find( $type, $id );
+
+		if ( null === $package ) {
+			wp_safe_redirect( $this->redirect_url( 'error', __( 'Package not found.', 'webba-deploy' ) ) );
+			exit;
+		}
+
+		$branch = isset( $_POST['branch'] ) ? trim( sanitize_text_field( wp_unslash( (string) $_POST['branch'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		if ( ! \WebbaDeploy\Core\PackageRepository::is_valid_branch( $branch ) ) {
+			wp_safe_redirect( $this->redirect_url( 'error', __( 'Enter a valid Git branch name.', 'webba-deploy' ) ) );
+			exit;
+		}
+
+		$previous_branch = (string) ( $package['branch'] ?? '' );
+		$owner           = (string) ( $package['owner'] ?? '' );
+		$repo_name       = (string) ( $package['repo'] ?? '' );
+
+		if ( $previous_branch !== $branch ) {
+			if ( null === $repo->update( $type, $id, array( 'branch' => $branch ) ) ) {
+				wp_safe_redirect( $this->redirect_url( 'error', __( 'Could not update the branch.', 'webba-deploy' ) ) );
+				exit;
+			}
+
+			$checker = new \WebbaDeploy\GitHub\CommitChecker();
+
+			if ( '' !== $previous_branch ) {
+				$checker->bust_cache( $owner, $repo_name, $previous_branch );
+			}
+
+			$checker->bust_cache( $owner, $repo_name, $branch );
+
+			delete_site_transient( 'update_plugins' );
+			delete_site_transient( 'update_themes' );
+		}
+
+		wp_safe_redirect( $this->redirect_url( 'branch_updated', '' ) );
+		exit;
+	}
+
+	/**
 	 * Delete package action.
 	 */
 	private function handle_delete(): void {
@@ -359,6 +455,11 @@ class Menu {
 		$id   = isset( $_POST['package_id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['package_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		Capability::require_manage_settings();
+
+		if ( ! in_array( $type, array( \WebbaDeploy\Core\PackageRepository::TYPE_PLUGIN, \WebbaDeploy\Core\PackageRepository::TYPE_THEME ), true ) ) {
+			wp_safe_redirect( $this->redirect_url( 'error', __( 'Invalid package type.', 'webba-deploy' ) ) );
+			exit;
+		}
 
 		$repo = new \WebbaDeploy\Core\PackageRepository();
 

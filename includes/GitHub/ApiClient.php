@@ -91,9 +91,10 @@ class ApiClient {
 		}
 
 		$args = array(
-			'method'  => $method,
-			'timeout' => 30,
-			'headers' => $headers,
+			'method'      => $method,
+			'timeout'     => 30,
+			'redirection' => 0,
+			'headers'     => $headers,
 		);
 
 		if ( 'POST' === $method && null !== $body ) {
@@ -169,6 +170,12 @@ class ApiClient {
 		$parsed = wp_parse_url( $url );
 
 		if ( ! is_array( $parsed ) || empty( $parsed['host'] ) ) {
+			return false;
+		}
+
+		$port = isset( $parsed['port'] ) ? (int) $parsed['port'] : 0;
+
+		if ( 0 !== $port && 443 !== $port ) {
 			return false;
 		}
 

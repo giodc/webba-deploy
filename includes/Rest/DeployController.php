@@ -60,9 +60,8 @@ class DeployController {
 					'permission_callback' => array( $this, 'authorize' ),
 					'args'                => array(
 						'secret'  => array(
-							'type'              => 'string',
-							'required'          => false,
-							'sanitize_callback' => 'sanitize_text_field',
+							'type'     => 'string',
+							'required' => false,
 						),
 						'package' => array(
 							'type'              => 'string',
@@ -82,12 +81,28 @@ class DeployController {
 	}
 
 	/**
-	 * Validate secret and rate limit before deploy.
+	 * Validate the per-type secret, rate-limiting only failed attempts.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|\WP_Error
 	 */
 	public function authorize( WP_REST_Request $request ) {
+		$type = $this->extract_param( $request, 'type' );
+
+		if ( ! in_array( $type, array( PackageRepository::TYPE_PLUGIN, PackageRepository::TYPE_THEME ), true ) ) {
+			return new \WP_Error(
+				'webba_deploy_bad_request',
+				__( 'Parameter "type" must be plugin or theme.', 'webba-deploy' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$secret = $this->extract_secret( $request );
+
+		if ( $this->site_secret->validate( $type, $secret ) ) {
+			return true;
+		}
+
 		if ( ! $this->rate_limiter->is_allowed( RateLimiter::client_key_from_request() ) ) {
 			return new \WP_Error(
 				'webba_deploy_rate_limited',
@@ -96,17 +111,11 @@ class DeployController {
 			);
 		}
 
-		$secret = $this->extract_secret( $request );
-
-		if ( ! $this->site_secret->validate( $secret ) ) {
-			return new \WP_Error(
-				'webba_deploy_unauthorized',
-				__( 'Invalid or missing deploy secret.', 'webba-deploy' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		return true;
+		return new \WP_Error(
+			'webba_deploy_unauthorized',
+			__( 'Invalid or missing deploy secret.', 'webba-deploy' ),
+			array( 'status' => 401 )
+		);
 	}
 
 	/**
@@ -195,7 +204,8 @@ class DeployController {
 				return sanitize_title( $raw );
 			}
 
-			return sanitize_text_field( $raw );
+			// Secrets must be compared verbatim; sanitizing mutates valid values.
+			return $raw;
 		}
 
 		return '';
@@ -216,7 +226,7 @@ class DeployController {
 		$header = $request->get_header( 'x-webba-deploy-secret' );
 
 		if ( is_string( $header ) && '' !== $header ) {
-			return sanitize_text_field( $header );
+			return $header;
 		}
 
 		return '';

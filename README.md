@@ -11,7 +11,7 @@ Deploy WordPress plugins and themes from GitHub — public or private repositori
 - **Install and update from GitHub** — add a repository URL, pick a branch, deploy.
 - **Private repositories** — read-only GitHub App, connected in one click.
 - **Native update screens** — managed packages appear on the Plugins and Themes screens.
-- **Push-to-deploy** — REST endpoint secured by a rotatable site secret for CI and GitHub Actions.
+- **Push-to-deploy** — REST endpoint secured by separate plugin/theme secrets, sent in a header for CI and GitHub Actions.
 - **Dashboard** — commit comparison, deploy status, and per-package actions.
 
 ## Requirements
@@ -34,7 +34,7 @@ wp plugin install https://github.com/giodc/webba-deploy/releases/latest/download
 
 ## Updates
 
-Webba Deploy updates itself from this repository's GitHub Releases using the WordPress `Update URI` mechanism. Automatic updates are enabled on activation and can be turned off on the **Plugins** screen.
+Webba Deploy updates itself from this repository's GitHub Releases using the WordPress `Update URI` mechanism. Automatic updates are **off by default**; enable them on the **Plugins** screen or under **Webba Deploy → Settings**.
 
 ## Documentation
 
