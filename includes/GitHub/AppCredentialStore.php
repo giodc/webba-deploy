@@ -68,9 +68,25 @@ class AppCredentialStore {
 			return null;
 		}
 
-		$pem = SecretEncryption::decrypt( (string) $data['private_key_enc'] );
+		$encoded = (string) $data['private_key_enc'];
+		$pem     = SecretEncryption::decrypt( $encoded );
 
-		return '' !== $pem && false !== strpos( $pem, 'BEGIN' ) ? $pem : null;
+		if ( '' === $pem || false === strpos( $pem, 'BEGIN' ) ) {
+			return null;
+		}
+
+		// Re-encrypt legacy unauthenticated payloads on first read.
+		if ( SecretEncryption::is_legacy( $encoded ) ) {
+			$upgraded = SecretEncryption::encrypt( $pem );
+
+			if ( '' !== $upgraded ) {
+				$data['private_key_enc'] = $upgraded;
+
+				update_option( self::OPTION_KEY, $data, false );
+			}
+		}
+
+		return $pem;
 	}
 
 	/**

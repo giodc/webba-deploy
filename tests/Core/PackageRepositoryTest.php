@@ -51,4 +51,23 @@ final class PackageRepositoryTest extends TestCase {
 		$this->assertNull( PackageRepository::parse_github_url( 'https://github.com/onlyowner' ) );
 		$this->assertNull( PackageRepository::parse_github_url( 'https://github.com/-badowner/repo' ) );
 	}
+
+	public function test_is_valid_branch_accepts_common_names(): void {
+		$this->assertTrue( PackageRepository::is_valid_branch( 'main' ) );
+		$this->assertTrue( PackageRepository::is_valid_branch( 'feature/new-ui' ) );
+		$this->assertTrue( PackageRepository::is_valid_branch( 'release/1.2.3' ) );
+		$this->assertTrue( PackageRepository::is_valid_branch( 'fix_bug-42' ) );
+	}
+
+	public function test_is_valid_branch_rejects_invalid_names(): void {
+		$this->assertFalse( PackageRepository::is_valid_branch( '' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( 'has space' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( '../main' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( 'main//sub' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( '/main' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( 'main/' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( '.hidden' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( 'main.lock' ) );
+		$this->assertFalse( PackageRepository::is_valid_branch( 'bad~char' ) );
+	}
 }

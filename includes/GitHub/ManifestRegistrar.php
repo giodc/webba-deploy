@@ -168,6 +168,8 @@ class ManifestRegistrar {
 			$this->redirect_with_notice( 'error', __( 'Invalid or expired setup state. Please try again.', 'webba-deploy' ) );
 		}
 
+		delete_transient( $this->state_transient_key() );
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['code'] ) ) : '';
 
@@ -186,8 +188,6 @@ class ManifestRegistrar {
 		if ( is_wp_error( $saved ) ) {
 			$this->redirect_with_notice( 'error', $saved->get_error_message() );
 		}
-
-		delete_transient( $this->state_transient_key() );
 
 		$connect = new ConnectController();
 

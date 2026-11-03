@@ -2,27 +2,27 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Webba Deploy 1.0.2\n"
+"Project-Id-Version: Webba Deploy 1.0.3\n"
 "Report-Msgid-Bugs-To: https://github.com/giodc/webba-deploy/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-24T23:32:43+00:00\n"
+"POT-Creation-Date: 2026-10-30T23:52:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: webba-deploy\n"
 
 #. Plugin Name of the plugin
 #: webba-deploy.php
-#: includes/Admin/Menu.php:58
+#: includes/Admin/Menu.php:81
 msgid "Webba Deploy"
 msgstr ""
 
 #. Plugin URI of the plugin
 #: webba-deploy.php
-msgid "https://wordpress.org/plugins/webba-deploy/"
+msgid "https://github.com/giodc/webba-deploy"
 msgstr ""
 
 #. Description of the plugin
@@ -41,16 +41,16 @@ msgid "https://giodc.com"
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:66
-#: includes/Admin/DashboardPage.php:48
-#: includes/Admin/Menu.php:80
-#: includes/Admin/Menu.php:81
+#: includes/Admin/DashboardPage.php:49
+#: includes/Admin/Menu.php:103
+#: includes/Admin/Menu.php:104
 msgid "Add Theme"
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:67
-#: includes/Admin/DashboardPage.php:45
-#: includes/Admin/Menu.php:68
-#: includes/Admin/Menu.php:69
+#: includes/Admin/DashboardPage.php:46
+#: includes/Admin/Menu.php:91
+#: includes/Admin/Menu.php:92
 msgid "Add Plugin"
 msgstr ""
 
@@ -63,7 +63,7 @@ msgid "Repository access"
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:90
-#: includes/Admin/DashboardPage.php:177
+#: includes/Admin/DashboardPage.php:202
 msgid "Public"
 msgstr ""
 
@@ -76,11 +76,11 @@ msgid "Repository URL"
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:121
-msgid "Public GitHub repository URL. The repository root must be the plugin or theme root."
+msgid "GitHub repository URL. Public repos work directly; a private URL requires the GitHub App. The repository root must be the plugin or theme root."
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:127
-#: includes/Admin/DashboardPage.php:189
+#: includes/Admin/DashboardPage.php:214
 msgid "Repository"
 msgstr ""
 
@@ -105,7 +105,8 @@ msgid "Only repositories you allowed when installing the GitHub App are listed h
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:164
-#: includes/Admin/DashboardPage.php:197
+#: includes/Admin/DashboardPage.php:225
+#: includes/Admin/DashboardPage.php:228
 msgid "Branch"
 msgstr ""
 
@@ -118,7 +119,7 @@ msgid "WordPress folder name under wp-content/plugins/ or themes/ (auto-filled f
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:182
-#: includes/Admin/DashboardPage.php:259
+#: includes/Admin/DashboardPage.php:354
 msgid "Install"
 msgstr ""
 
@@ -131,8 +132,9 @@ msgid "Save package"
 msgstr ""
 
 #: includes/Admin/AddPackagePage.php:196
+#: includes/Admin/GeneralSettingsPage.php:100
 #: includes/Admin/GitHubSettingsPage.php:86
-#: includes/Admin/SettingsPage.php:99
+#: includes/Admin/SettingsPage.php:117
 msgid "Back to dashboard"
 msgstr ""
 
@@ -157,133 +159,209 @@ msgstr ""
 msgid "Continue GitHub App installation & choose repositories"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:38
-#: includes/Admin/Menu.php:57
-#: includes/Admin/Menu.php:111
+#: includes/Admin/DashboardPage.php:39
+#: includes/Admin/Menu.php:80
+#: includes/Admin/Menu.php:144
 msgid "Dashboard"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:40
+#: includes/Admin/DashboardPage.php:41
 msgid "Install and update WordPress plugins and themes from public GitHub repositories."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:58
+#: includes/Admin/DashboardPage.php:59
 msgid "Check for Updates"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:64
-msgid "Manage push-to-deploy secret"
-msgstr ""
-
-#: includes/Admin/DashboardPage.php:68
-msgid "Plugins"
+#: includes/Admin/DashboardPage.php:66
+msgid "Manage push-to-deploy secrets"
 msgstr ""
 
 #: includes/Admin/DashboardPage.php:71
-msgid "Themes"
+msgid "Plugins"
 msgstr ""
 
 #: includes/Admin/DashboardPage.php:74
+msgid "Themes"
+msgstr ""
+
+#: includes/Admin/DashboardPage.php:77
 msgid "Recent activity"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:100
-#: includes/Core/DeployService.php:216
-#: includes/Rest/DeployController.php:164
+#: includes/Admin/DashboardPage.php:104
+#: includes/Core/DeployService.php:257
+#: includes/Rest/DeployController.php:173
 msgid "Deploy completed successfully."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:103
+#: includes/Admin/DashboardPage.php:107
 msgid "Installed successfully."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:106
+#: includes/Admin/DashboardPage.php:110
 msgid "Updated successfully."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:109
+#: includes/Admin/DashboardPage.php:113
 msgid "Package saved."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:112
-#: includes/Admin/Menu.php:296
+#: includes/Admin/DashboardPage.php:116
+#: includes/Admin/Menu.php:467
 msgid "Package removed."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:115
+#: includes/Admin/DashboardPage.php:119
+msgid "Branch updated. Deploy the package to switch this site to the new branch."
+msgstr ""
+
+#: includes/Admin/DashboardPage.php:122
 msgid "Update check completed. GitHub and WordPress update lists were refreshed."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:138
+#: includes/Admin/DashboardPage.php:145
 msgid "No packages yet."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:176
+#: includes/Admin/DashboardPage.php:201
 msgid "Private"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:195
+#: includes/Admin/DashboardPage.php:220
 #: includes/Admin/GitHubSettingsPage.php:47
 msgid "Access"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:200
+#: includes/Admin/DashboardPage.php:261
+msgid "Change"
+msgstr ""
+
+#: includes/Admin/DashboardPage.php:269
 msgid "Commit"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:203
+#: includes/Admin/DashboardPage.php:272
 msgid "Last deploy"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:213
+#: includes/Admin/DashboardPage.php:282
 msgid "Never"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:220
-msgid "Push-to-deploy URL"
+#: includes/Admin/DashboardPage.php:290
+msgid "Deploy URL"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:234
-#: includes/Admin/SettingsPage.php:59
+#: includes/Admin/DashboardPage.php:304
+#: includes/Admin/DashboardPage.php:325
+#: includes/Admin/SettingsPage.php:72
 msgid "Copied!"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:236
-#: includes/Admin/SettingsPage.php:61
+#: includes/Admin/DashboardPage.php:306
+#: includes/Admin/DashboardPage.php:327
+#: includes/Admin/SettingsPage.php:74
 msgid "Copy"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:245
-#: includes/GitHub/CommitChecker.php:150
+#: includes/Admin/DashboardPage.php:311
+msgid "Secret"
+msgstr ""
+
+#: includes/Admin/DashboardPage.php:331
+msgid "Send the secret in the X-Webba-Deploy-Secret header (recommended). The legacy secret query parameter is still accepted."
+msgstr ""
+
+#: includes/Admin/DashboardPage.php:340
+#: includes/GitHub/CommitChecker.php:169
 msgid "Up to date"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:257
+#: includes/Admin/DashboardPage.php:352
 msgid "Update now"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:266
+#: includes/Admin/DashboardPage.php:361
 msgid "Remove this package from Webba Deploy?"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:273
+#: includes/Admin/DashboardPage.php:368
 msgid "Delete"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:288
+#: includes/Admin/DashboardPage.php:383
 msgid "No log entries yet."
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:295
+#: includes/Admin/DashboardPage.php:390
 msgid "Time"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:296
+#: includes/Admin/DashboardPage.php:391
 msgid "Level"
 msgstr ""
 
-#: includes/Admin/DashboardPage.php:297
+#: includes/Admin/DashboardPage.php:392
 msgid "Message"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:39
+#: includes/Admin/Menu.php:133
+#: includes/Admin/Menu.php:134
+msgid "Settings"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:41
+msgid "Control deploy logging, cache flushing, and cleanup on uninstall."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:51
+msgid "Activity log"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:55
+msgid "Record deploy events on the dashboard (last 50 entries)."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:60
+msgid "Cache"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:64
+msgid "Flush caches after each successful deploy."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:70
+msgid "Updates"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:74
+msgid "Enable automatic updates for Webba Deploy from GitHub Releases."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:77
+msgid "Off by default. Only enable this if you trust future releases published to this repository."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:83
+msgid "Uninstall"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:87
+msgid "Delete all Webba Deploy data when the plugin is uninstalled."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:90
+msgid "Packages, logs, the deploy secret, and GitHub App credentials are removed. This cannot be undone."
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:96
+msgid "Save settings"
+msgstr ""
+
+#: includes/Admin/GeneralSettingsPage.php:122
+msgid "Settings saved."
 msgstr ""
 
 #: includes/Admin/GitHubSettingsPage.php:37
@@ -420,223 +498,231 @@ msgstr ""
 msgid "The App is registered — finish on GitHub by choosing your user or organization, then \"Only select repositories\" (recommended)."
 msgstr ""
 
-#: includes/Admin/GitHubSettingsPage.php:263
+#: includes/Admin/GitHubSettingsPage.php:264
 msgid "GitHub App connected successfully."
 msgstr ""
 
-#: includes/Admin/GitHubSettingsPage.php:266
+#: includes/Admin/GitHubSettingsPage.php:267
 msgid "GitHub installation disconnected."
 msgstr ""
 
-#: includes/Admin/GitHubSettingsPage.php:269
-#: includes/GitHub/ManifestRegistrar.php:175
+#: includes/Admin/GitHubSettingsPage.php:270
+#: includes/GitHub/ManifestRegistrar.php:199
 msgid "GitHub App registered. Continue installation to choose repositories."
 msgstr ""
 
-#: includes/Admin/GitHubSettingsPage.php:272
+#: includes/Admin/GitHubSettingsPage.php:273
 msgid "GitHub App registration removed from this site."
 msgstr ""
 
-#: includes/Admin/Menu.php:92
-#: includes/Admin/Menu.php:93
-#: includes/Admin/SettingsPage.php:31
+#: includes/Admin/Menu.php:115
+#: includes/Admin/Menu.php:116
+#: includes/Admin/SettingsPage.php:33
 msgid "Push-to-deploy"
 msgstr ""
 
-#: includes/Admin/Menu.php:101
-#: includes/Admin/Menu.php:102
+#: includes/Admin/Menu.php:124
+#: includes/Admin/Menu.php:125
 msgid "GitHub"
 msgstr ""
 
-#: includes/Admin/Menu.php:185
+#: includes/Admin/Menu.php:272
 msgid "App credentials are defined in wp-config.php and cannot be removed here."
 msgstr ""
 
-#: includes/Admin/Menu.php:219
+#: includes/Admin/Menu.php:306
 msgid "GitHub App disconnected."
 msgstr ""
 
-#: includes/Admin/Menu.php:258
+#: includes/Admin/Menu.php:327
+#: includes/Admin/Menu.php:460
+#: includes/Core/UpgraderFactory.php:101
+msgid "Invalid package type."
+msgstr ""
+
+#: includes/Admin/Menu.php:367
+#: includes/Admin/Menu.php:401
 msgid "Invalid package."
 msgstr ""
 
-#: includes/Admin/Menu.php:300
+#: includes/Admin/Menu.php:411
+#: includes/Core/DeployService.php:108
+#: includes/Core/DeployService.php:133
+#: includes/Core/DeployService.php:177
+msgid "Package not found."
+msgstr ""
+
+#: includes/Admin/Menu.php:418
+msgid "Enter a valid Git branch name."
+msgstr ""
+
+#: includes/Admin/Menu.php:428
+msgid "Could not update the branch."
+msgstr ""
+
+#: includes/Admin/Menu.php:471
 msgid "Could not remove package."
 msgstr ""
 
-#: includes/Admin/Menu.php:325
+#: includes/Admin/Menu.php:496
 msgid "Connect the GitHub App before adding a private package."
 msgstr ""
 
-#: includes/Admin/Menu.php:333
+#: includes/Admin/Menu.php:504
 msgid "Select a repository from the list."
 msgstr ""
 
-#: includes/Admin/Menu.php:345
-msgid "Repository is not granted to your GitHub App installation."
-msgstr ""
-
-#: includes/Admin/Menu.php:353
+#: includes/Admin/Menu.php:517
 msgid "Invalid GitHub repository URL."
 msgstr ""
 
-#: includes/Admin/Menu.php:370
+#: includes/Admin/Menu.php:539
+msgid "This repository is private. Connect the GitHub App (Webba Deploy → GitHub) and grant it access to add it."
+msgstr ""
+
+#: includes/Admin/Menu.php:556
 msgid "A package with this slug already exists."
 msgstr ""
 
-#: includes/Admin/Menu.php:386
+#: includes/Admin/Menu.php:572
 msgid "Could not save package."
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:33
-msgid "Trigger deploys from CI or GitHub Actions using a secret URL. Keep your site secret private."
-msgstr ""
-
-#: includes/Admin/SettingsPage.php:36
-msgid "Site secret"
-msgstr ""
-
-#: includes/Admin/SettingsPage.php:39
-msgid "Current secret"
-msgstr ""
-
-#: includes/Admin/SettingsPage.php:43
-msgid "Full secret is only shown immediately after rotation."
+#: includes/Admin/SettingsPage.php:35
+msgid "Trigger deploys from CI or GitHub Actions using a secret. Send it in the X-Webba-Deploy-Secret header. Keep your secrets private."
 msgstr ""
 
 #: includes/Admin/SettingsPage.php:47
-msgid "New secret (copy now):"
+msgid "Theme deploys"
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:68
+#: includes/Admin/SettingsPage.php:48
+msgid "Plugin deploys"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:53
+msgid "Current secret"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:59
+msgid "New secret (shown once — copy now):"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:81
 msgid "Rotate secret"
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:70
-msgid "Rotate the deploy secret? Existing CI jobs must be updated."
+#: includes/Admin/SettingsPage.php:83
+msgid "Rotate this deploy secret? Existing CI jobs for this type must be updated."
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:74
+#: includes/Admin/SettingsPage.php:88
 msgid "Generate new secret"
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:80
-msgid "Deploy endpoint"
-msgstr ""
-
-#: includes/Admin/SettingsPage.php:83
+#: includes/Admin/SettingsPage.php:94
 msgid "Example request"
 msgstr ""
 
+#: includes/Admin/SettingsPage.php:98
+msgid "Deploy endpoint"
+msgstr ""
+
+#: includes/Admin/SettingsPage.php:101
+msgid "The legacy secret query parameter is still accepted for backwards compatibility, but the header avoids leaking the secret into access logs."
+msgstr ""
+
 #. translators: %s: path to example workflow file
-#: includes/Admin/SettingsPage.php:91
+#: includes/Admin/SettingsPage.php:109
 #, php-format
 msgid "See %s for a GitHub Actions workflow template."
 msgstr ""
 
-#: includes/Admin/SettingsPage.php:132
-msgid "Deploy secret rotated. Copy the new secret below and update your CI configuration."
+#: includes/Admin/SettingsPage.php:174
+msgid "Deploy secret rotated. Copy the new secret shown above and update your CI configuration."
 msgstr ""
 
-#: includes/Core/ArchiveDownloader.php:54
+#: includes/Admin/SettingsPage.php:175
+msgid "Could not rotate the deploy secret."
+msgstr ""
+
+#: includes/Core/ArchiveDownloader.php:59
 msgid "Only GitHub API URLs are allowed for downloads."
 msgstr ""
 
-#: includes/Core/ArchiveDownloader.php:95
+#: includes/Core/ArchiveDownloader.php:78
 msgid "Archive redirect to a disallowed host was blocked."
 msgstr ""
 
+#: includes/Core/ArchiveDownloader.php:120
+msgid "Could not create a temporary file for the archive."
+msgstr ""
+
+#: includes/Core/ArchiveDownloader.php:180
+msgid "Downloaded archive was empty."
+msgstr ""
+
+#. translators: %d: maximum archive size in megabytes
+#: includes/Core/ArchiveDownloader.php:198
+#, php-format
+msgid "The archive exceeds the maximum allowed size of %d MB."
+msgstr ""
+
 #. translators: %d: HTTP status code
-#: includes/Core/ArchiveDownloader.php:107
+#: includes/Core/ArchiveDownloader.php:217
 #, php-format
 msgid "GitHub returned HTTP %d while fetching the archive."
 msgstr ""
 
-#. translators: %d: HTTP status code
-#: includes/Core/ArchiveDownloader.php:152
-#, php-format
-msgid "Archive download failed with HTTP %d."
+#: includes/Core/DeployService.php:152
+msgid "Another deploy is already in progress. Please try again shortly."
 msgstr ""
 
-#: includes/Core/ArchiveDownloader.php:171
-msgid "Downloaded archive was empty."
-msgstr ""
-
-#: includes/Core/ArchiveDownloader.php:180
-msgid "Could not create a temporary file for the archive."
-msgstr ""
-
-#: includes/Core/ArchiveDownloader.php:192
-msgid "Could not write the archive to disk."
-msgstr ""
-
-#: includes/Core/DeployService.php:90
-#: includes/Core/DeployService.php:115
-#: includes/Core/DeployService.php:136
-msgid "Package not found."
-msgstr ""
-
-#: includes/Core/DeployService.php:214
+#: includes/Core/DeployService.php:255
 msgid "Updated from the Plugins or Themes screen."
 msgstr ""
 
 #. translators: %s: short Git commit hash
-#: includes/Core/DeployService.php:222
+#: includes/Core/DeployService.php:263
 #, php-format
 msgid "Deployed commit %s."
 msgstr ""
 
 #. translators: %s: short Git commit hash
-#: includes/Core/DeployService.php:229
+#: includes/Core/DeployService.php:270
 #, php-format
 msgid "Updated from WordPress admin (commit %s)."
 msgstr ""
 
-#: includes/Core/DeployService.php:346
-msgid "Connect the GitHub App before deploying private repositories."
-msgstr ""
-
-#: includes/Core/DeployService.php:358
-msgid "This repository is not available on your GitHub App installation. Grant access on GitHub or pick another repository."
-msgstr ""
-
-#: includes/Core/DeployService.php:367
-msgid "GitHub App installation ID is missing."
-msgstr ""
-
-#: includes/Core/DeployService.php:403
+#: includes/Core/DeployService.php:410
 msgid "No administrator account is available to run the deploy."
 msgstr ""
 
-#: includes/Core/DeployService.php:415
+#: includes/Core/DeployService.php:422
 msgid "No user with permission to install packages could be found."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:50
+#: includes/Core/UpgraderFactory.php:54
 msgid "Archive file is not readable."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:57
+#: includes/Core/UpgraderFactory.php:61
 msgid "Downloaded file is not a valid ZIP archive."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:97
-msgid "Invalid package type."
-msgstr ""
-
-#: includes/Core/UpgraderFactory.php:117
+#: includes/Core/UpgraderFactory.php:121
 msgid "Upgrader failed without details."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:125
+#: includes/Core/UpgraderFactory.php:129
 msgid "Package was processed but the expected folder was not created. Check the folder slug and archive structure."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:229
+#: includes/Core/UpgraderFactory.php:233
 msgid "Could not replace the existing temporary install folder."
 msgstr ""
 
-#: includes/Core/UpgraderFactory.php:239
+#: includes/Core/UpgraderFactory.php:243
 msgid "Could not rename the package folder to the configured slug."
 msgstr ""
 
@@ -648,102 +734,130 @@ msgstr ""
 msgid "Only GitHub API URLs are allowed."
 msgstr ""
 
-#: includes/GitHub/ApiClient.php:133
+#: includes/GitHub/ApiClient.php:134
 msgid "GitHub API returned an invalid response."
 msgstr ""
 
 #. translators: %s: GitHub error message
-#: includes/GitHub/ApiClient.php:151
+#: includes/GitHub/ApiClient.php:152
 #, php-format
 msgid "GitHub API error: %s"
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: includes/GitHub/ApiClient.php:158
+#: includes/GitHub/ApiClient.php:159
 #, php-format
 msgid "GitHub API returned HTTP %d."
 msgstr ""
 
-#: includes/GitHub/AppConfig.php:126
+#: includes/GitHub/AppConfig.php:136
 msgid "Contents"
 msgstr ""
 
-#: includes/GitHub/AppConfig.php:127
-#: includes/GitHub/AppConfig.php:132
+#: includes/GitHub/AppConfig.php:137
+#: includes/GitHub/AppConfig.php:142
 msgid "Read-only"
 msgstr ""
 
-#: includes/GitHub/AppConfig.php:128
+#: includes/GitHub/AppConfig.php:138
 msgid "Download zipball archives for deploy."
 msgstr ""
 
-#: includes/GitHub/AppConfig.php:131
+#: includes/GitHub/AppConfig.php:141
 msgid "Metadata"
 msgstr ""
 
-#: includes/GitHub/AppConfig.php:133
+#: includes/GitHub/AppConfig.php:143
 msgid "List repositories and read default branch."
 msgstr ""
 
-#: includes/GitHub/AppCredentialStore.php:90
+#: includes/GitHub/AppCredentialStore.php:106
 msgid "GitHub did not return complete App credentials."
 msgstr ""
 
-#: includes/GitHub/AppCredentialStore.php:99
+#: includes/GitHub/AppCredentialStore.php:115
 msgid "Could not securely store the GitHub App private key."
 msgstr ""
 
-#: includes/GitHub/CommitChecker.php:68
+#: includes/GitHub/BranchLister.php:72
+msgid "Package repository is missing an owner or name."
+msgstr ""
+
+#: includes/GitHub/CommitChecker.php:87
 msgid "Could not read the latest commit from GitHub."
 msgstr ""
 
-#: includes/GitHub/CommitChecker.php:152
+#: includes/GitHub/CommitChecker.php:171
 msgid "Update available"
 msgstr ""
 
-#: includes/GitHub/CommitChecker.php:154
+#: includes/GitHub/CommitChecker.php:173
 msgid "Not installed"
 msgstr ""
 
-#: includes/GitHub/CommitChecker.php:156
+#: includes/GitHub/CommitChecker.php:175
 msgid "Unknown"
 msgstr ""
 
-#: includes/GitHub/ConnectController.php:52
+#: includes/GitHub/ConnectController.php:85
 msgid "Set up the GitHub App first (Webba Deploy → GitHub → Set up with GitHub)."
 msgstr ""
 
-#: includes/GitHub/ConnectController.php:81
+#: includes/GitHub/ConnectController.php:114
 msgid "Invalid or expired connection state. Please try again."
 msgstr ""
 
-#: includes/GitHub/ConnectController.php:88
+#: includes/GitHub/ConnectController.php:123
 msgid "GitHub did not return an installation ID."
 msgstr ""
 
 #. translators: %s: GitHub account login
-#: includes/GitHub/ConnectController.php:104
+#: includes/GitHub/ConnectController.php:138
 #, php-format
 msgid "Connected to GitHub as %s. Only repositories you selected on GitHub are available."
 msgstr ""
 
-#: includes/GitHub/ConnectController.php:177
+#: includes/GitHub/ConnectController.php:217
 msgid "Connected, but no repositories are available. Edit the GitHub App installation and grant access to at least one repository."
 msgstr ""
 
-#: includes/GitHub/InstallationTokenService.php:41
+#: includes/GitHub/GitHubAppAuth.php:117
+msgid "Set up the GitHub App (Webba Deploy → GitHub) before deploying private repositories."
+msgstr ""
+
+#: includes/GitHub/GitHubAppAuth.php:124
+msgid "Connect the GitHub App before deploying private repositories."
+msgstr ""
+
+#: includes/GitHub/GitHubAppAuth.php:133
+msgid "GitHub App installation ID is missing. Reconnect the GitHub App."
+msgstr ""
+
+#: includes/GitHub/GitHubAppAuth.php:142
+msgid "Could not verify repository access with GitHub. Please try again shortly."
+msgstr ""
+
+#: includes/GitHub/GitHubAppAuth.php:149
+msgid "This repository is not available on your GitHub App installation. Grant access on GitHub or pick another repository."
+msgstr ""
+
+#: includes/GitHub/GitHubAppAuth.php:179
+msgid "Repository not found, or it is private and not accessible to the GitHub App. Check the URL, and grant access on GitHub for private repositories."
+msgstr ""
+
+#: includes/GitHub/InstallationTokenService.php:65
 msgid "GitHub App is not connected."
 msgstr ""
 
-#: includes/GitHub/InstallationTokenService.php:73
+#: includes/GitHub/InstallationTokenService.php:97
 msgid "GitHub did not return an installation token."
 msgstr ""
 
-#: includes/GitHub/InstallationTokenService.php:101
+#: includes/GitHub/InstallationTokenService.php:125
 msgid "GitHub App is not set up. Use Webba Deploy → GitHub."
 msgstr ""
 
-#: includes/GitHub/InstallationTokenService.php:111
+#: includes/GitHub/InstallationTokenService.php:135
 msgid "GitHub App credentials are incomplete."
 msgstr ""
 
@@ -751,73 +865,73 @@ msgstr ""
 msgid "Invalid GitHub App private key."
 msgstr ""
 
-#: includes/GitHub/JwtGenerator.php:63
+#: includes/GitHub/JwtGenerator.php:60
 msgid "Could not sign the GitHub App JWT."
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:120
+#: includes/GitHub/ManifestRegistrar.php:144
 msgid "Could not determine a public site URL for the GitHub App manifest."
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:144
+#: includes/GitHub/ManifestRegistrar.php:168
 msgid "Invalid or expired setup state. Please try again."
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:151
+#: includes/GitHub/ManifestRegistrar.php:177
 msgid "GitHub did not return an authorization code."
 msgstr ""
 
 #. translators: %s: WordPress site title or hostname
-#: includes/GitHub/ManifestRegistrar.php:216
+#: includes/GitHub/ManifestRegistrar.php:240
 #, php-format
 msgid "Webba Deploy — %s"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:252
+#: includes/GitHub/ManifestRegistrar.php:276
 msgid "homepage URL"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:253
+#: includes/GitHub/ManifestRegistrar.php:277
 msgid "redirect URL"
 msgstr ""
 
 #. translators: 1: URL field label, 2: URL value
-#: includes/GitHub/ManifestRegistrar.php:264
+#: includes/GitHub/ManifestRegistrar.php:288
 #, php-format
 msgid "GitHub App %1$s is not valid: %2$s"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:275
+#: includes/GitHub/ManifestRegistrar.php:299
 msgid "GitHub App callback URL is missing."
 msgstr ""
 
 #. translators: %s: callback URL
-#: includes/GitHub/ManifestRegistrar.php:287
+#: includes/GitHub/ManifestRegistrar.php:311
 #, php-format
 msgid "GitHub App callback URL is not valid: %s"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:312
+#: includes/GitHub/ManifestRegistrar.php:336
 msgid "Could not build GitHub App manifest."
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:320
+#: includes/GitHub/ManifestRegistrar.php:344
 msgid "Redirecting to GitHub…"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:323
+#: includes/GitHub/ManifestRegistrar.php:347
 msgid "Redirecting to GitHub to create your App…"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:327
+#: includes/GitHub/ManifestRegistrar.php:351
 msgid "Click Continue to open GitHub."
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:328
+#: includes/GitHub/ManifestRegistrar.php:352
 msgid "Continue to GitHub"
 msgstr ""
 
-#: includes/GitHub/ManifestRegistrar.php:393
+#: includes/GitHub/ManifestRegistrar.php:420
 msgid "Invalid GitHub install URL."
 msgstr ""
 
@@ -839,30 +953,35 @@ msgstr ""
 msgid "GitHub App setup requires a public HTTPS site URL. Use HTTPS or an ngrok https:// URL for local development."
 msgstr ""
 
-#: includes/GitHub/RepositoryLister.php:42
+#: includes/GitHub/RepositoryLister.php:66
 msgid "Connect the GitHub App before selecting private repositories."
 msgstr ""
 
-#: includes/Rest/DeployController.php:94
+#: includes/Rest/DeployController.php:95
+#: includes/Rest/DeployController.php:142
+msgid "Parameter \"type\" must be plugin or theme."
+msgstr ""
+
+#: includes/Rest/DeployController.php:109
 msgid "Too many deploy requests. Try again later."
 msgstr ""
 
-#: includes/Rest/DeployController.php:104
+#: includes/Rest/DeployController.php:116
 msgid "Invalid or missing deploy secret."
 msgstr ""
 
-#: includes/Rest/DeployController.php:125
+#: includes/Rest/DeployController.php:134
 msgid "Parameters \"package\" and \"type\" are required."
-msgstr ""
-
-#: includes/Rest/DeployController.php:133
-msgid "Parameter \"type\" must be plugin or theme."
 msgstr ""
 
 #: includes/Security/Capability.php:64
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/Security/Capability.php:75
+#: includes/Security/Capability.php:82
 msgid "You do not have permission to perform this deploy."
+msgstr ""
+
+#: includes/Security/Capability.php:91
+msgid "You do not have permission to manage deploy secrets."
 msgstr ""

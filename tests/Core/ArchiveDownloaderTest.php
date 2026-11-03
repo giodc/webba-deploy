@@ -49,7 +49,16 @@ final class ArchiveDownloaderTest extends TestCase {
 
 		$this->assertFalse( $downloader->is_allowed_url( 'https://evil.example.com/repos/a/b' ) );
 		$this->assertFalse( $downloader->is_allowed_url( 'http://api.github.com/repos/a/b' ) );
+		$this->assertFalse( $downloader->is_allowed_url( 'https://api.github.com:8443/repos/a/b' ) );
 		$this->assertFalse( $downloader->is_allowed_url( 'not a url' ) );
 		$this->assertFalse( $downloader->is_allowed_url( '' ) );
+	}
+
+	public function test_is_allowed_url_allows_the_default_https_port(): void {
+		Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
+
+		$downloader = new ArchiveDownloader();
+
+		$this->assertTrue( $downloader->is_allowed_url( 'https://api.github.com:443/repos/a/b' ) );
 	}
 }

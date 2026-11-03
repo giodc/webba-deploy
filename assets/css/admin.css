@@ -134,6 +134,10 @@
 	margin-bottom: 0.35em;
 }
 
+.webba-deploy-card__label--secret {
+	margin-top: 0.65em;
+}
+
 .webba-deploy-card__push {
 	min-width: 0;
 }
@@ -156,6 +160,21 @@
 	display: inline-block;
 	margin: 0;
 	vertical-align: middle;
+}
+
+.webba-deploy-branch-form {
+	align-items: center;
+	display: flex;
+	gap: 0.35rem;
+	margin: 0;
+	max-width: 18em;
+}
+
+.webba-deploy-branch-form .webba-deploy-branch-input {
+	box-sizing: border-box;
+	flex: 1 1 auto;
+	margin: 0;
+	min-width: 0;
 }
 
 .webba-deploy-status--success {

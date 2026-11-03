@@ -1,6 +1,6 @@
 <?php
 /**
- * Site-wide push-to-deploy secret.
+ * Per-type push-to-deploy secrets.
  *
  * @package WebbaDeploy
  */
@@ -10,46 +10,75 @@ declare(strict_types=1);
 namespace WebbaDeploy\Security;
 
 /**
- * Generates, stores, and validates the deploy URL secret.
+ * Generates, stores, and validates plugin/theme deploy URL secrets.
  */
 class SiteSecret {
 
-	private const OPTION_KEY = 'webba_deploy_site_secret';
+	/**
+	 * Option prefix for per-type secrets.
+	 */
+	private const OPTION_PREFIX = 'webba_deploy_site_secret_';
 
 	/**
-	 * Get the current secret, creating one if missing.
+	 * Legacy single-site secret (migrated into per-type secrets on read).
 	 */
-	public function get(): string {
-		$secret = get_option( self::OPTION_KEY, '' );
+	private const LEGACY_OPTION = 'webba_deploy_site_secret';
+
+	/**
+	 * Get the current secret for a package type, creating one if missing.
+	 *
+	 * @param string $type plugin|theme.
+	 */
+	public function get( string $type = 'plugin' ): string {
+		$type   = $this->normalize_type( $type );
+		$secret = get_option( self::OPTION_PREFIX . $type, '' );
 
 		if ( is_string( $secret ) && '' !== $secret ) {
 			return $secret;
 		}
 
-		return $this->rotate();
+		$legacy = get_option( self::LEGACY_OPTION, '' );
+
+		if ( is_string( $legacy ) && '' !== $legacy ) {
+			update_option( self::OPTION_PREFIX . $type, $legacy, false );
+
+			return $legacy;
+		}
+
+		return $this->rotate( $type );
 	}
 
 	/**
-	 * Generate and persist a new secret.
+	 * Generate and persist a new secret for a package type.
+	 *
+	 * @param string $type plugin|theme.
 	 */
-	public function rotate(): string {
-		$secret = wp_generate_password( 64, true, true );
-		update_option( self::OPTION_KEY, $secret, false );
+	public function rotate( string $type = 'plugin' ): string {
+		$type   = $this->normalize_type( $type );
+		$secret = wp_generate_password( 64, false, false );
+
+		update_option( self::OPTION_PREFIX . $type, $secret, false );
 
 		return $secret;
 	}
 
 	/**
-	 * Timing-safe secret comparison.
+	 * Timing-safe secret comparison for a package type.
 	 *
+	 * @param string $type     plugin|theme.
 	 * @param string $provided Secret from the request.
 	 */
-	public function validate( string $provided ): bool {
+	public function validate( string $type, string $provided ): bool {
 		if ( '' === $provided ) {
 			return false;
 		}
 
-		$stored = get_option( self::OPTION_KEY, '' );
+		$type   = $this->normalize_type( $type );
+		$stored = get_option( self::OPTION_PREFIX . $type, '' );
+
+		if ( ! is_string( $stored ) || '' === $stored ) {
+			$stored = get_option( self::LEGACY_OPTION, '' );
+		}
 
 		if ( ! is_string( $stored ) || '' === $stored ) {
 			return false;
@@ -61,10 +90,10 @@ class SiteSecret {
 	/**
 	 * Mask secret for display (first 4 + ellipsis + last 4).
 	 *
-	 * @param string|null $secret Secret to mask; uses stored secret when null.
+	 * @param string|null $secret Secret to mask; uses plugin secret when null.
 	 */
 	public function mask( ?string $secret = null ): string {
-		$secret = null !== $secret ? $secret : $this->get();
+		$secret = null !== $secret ? $secret : $this->get( 'plugin' );
 		$length = strlen( $secret );
 
 		if ( $length <= 12 ) {
@@ -72,5 +101,14 @@ class SiteSecret {
 		}
 
 		return substr( $secret, 0, 4 ) . str_repeat( '•', min( 24, $length - 8 ) ) . substr( $secret, -4 );
+	}
+
+	/**
+	 * Normalize a package type to plugin|theme.
+	 *
+	 * @param string $type Raw type.
+	 */
+	private function normalize_type( string $type ): string {
+		return 'theme' === $type ? 'theme' : 'plugin';
 	}
 }

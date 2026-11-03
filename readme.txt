@@ -4,7 +4,7 @@ Tags: github, deploy, theme, update, git
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,7 +20,7 @@ Webba Deploy lets site administrators install and update WordPress plugins and t
 * **Private repositories** — read-only GitHub App; repository access is chosen on GitHub during installation.
 * **One-click GitHub setup** — register the App from **Webba Deploy → GitHub** (no wp-config.php required); credentials stored encrypted in the database.
 * **Native WordPress updates** — packages appear on **Plugins** and **Themes** update screens.
-* **Push-to-deploy** — REST endpoint secured by a rotatable site secret (for CI / GitHub Actions).
+* **Push-to-deploy** — REST endpoint secured by separate plugin/theme secrets, sent in the `X-Webba-Deploy-Secret` header (for CI / GitHub Actions).
 * **Dashboard** — deploy status, commit comparison, and per-package actions.
 
 **External services**
@@ -34,7 +34,7 @@ When you use one-click setup, the plugin stores the GitHub App ID and private ke
 
 **Updates**
 
-Webba Deploy updates itself from its own GitHub Releases using the WordPress `Update URI` mechanism, and opts into automatic updates on activation. It also injects update offers for plugins and themes that an administrator has explicitly registered to deploy from GitHub, using the same GitHub zipball download path as a manual deploy.
+Webba Deploy updates itself from its own GitHub Releases using the WordPress `Update URI` mechanism. Automatic updates are off by default and can be enabled on the **Plugins** screen or under **Webba Deploy → Settings**. It also injects update offers for plugins and themes that an administrator has explicitly registered to deploy from GitHub, using the same GitHub zipball download path as a manual deploy.
 
 **Requirements**
 
@@ -78,7 +78,7 @@ No. The repository is public, and update checks use unauthenticated GitHub API r
 
 = Is push-to-deploy secure? =
 
-Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deploy → Push-to-deploy** if exposed, and use HTTPS only.
+Deploy requests are authenticated by separate plugin and theme secrets. Send the matching secret in the `X-Webba-Deploy-Secret` header; the legacy query-string `secret` parameter is still accepted but can appear in access logs. Keep secrets private, rotate them from **Webba Deploy → Push-to-deploy** if exposed, and use HTTPS only.
 
 == Screenshots ==
 
@@ -87,6 +87,15 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 3. Add plugin from a private GitHub repository
 
 == Changelog ==
+
+= 1.0.3 =
+* Security: push-to-deploy secrets are split by package type and only shown to users who can deploy that type.
+* Security: deploy secrets are compared verbatim, sent in the `X-Webba-Deploy-Secret` header by default, and rate limiting now counts only failed attempts.
+* Security: GitHub archives stream to disk with a size cap; API redirects are disabled and installation tokens are only sent to `api.github.com`.
+* Security: OAuth/manifest state is single-use, failed App connections are rolled back, and legacy stored credentials are re-encrypted on read.
+* Security: automatic self-updates are now opt-in.
+* New: change a package's tracked branch from the dashboard, with a branch picker.
+* Docs/CI: header-first push-to-deploy documentation, pinned GitHub Actions, and least-privilege workflow permissions.
 
 = 1.0.2 =
 * Custom Webba Deploy icon in the admin menu.
@@ -128,6 +137,9 @@ Deploy URLs include a site secret. Keep it private, rotate it from **Webba Deplo
 * Initial release: public GitHub plugin and theme deploy, admin dashboard, deploy logging.
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Push-to-deploy secrets are now separate for plugins and themes. Existing secrets are migrated automatically and legacy `?secret=` URLs keep working; prefer the `X-Webba-Deploy-Secret` header. Automatic self-updates are now opt-in.
 
 = 1.0.2 =
 Custom admin menu icon and plugin icon on the Updates screen. No functional changes.

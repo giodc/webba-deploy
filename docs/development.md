@@ -33,7 +33,8 @@ For webhook and install callbacks on a local site, use a tunnel (e.g. ngrok) or 
 
 ## Manual test (Phase 2)
 
-1. Copy a package push-to-deploy URL from the dashboard.
-2. `curl -fsS -X POST "<url>"` — expect HTTP 200 and updated files.
+1. Copy the package **Deploy URL** and the matching **plugin/theme secret** from the dashboard.
+2. `curl -fsS -X POST -H "X-Webba-Deploy-Secret: <secret>" "<url>"` — expect HTTP 200 and updated files.
 3. Call with a wrong secret — expect HTTP 401.
-4. **Push-to-deploy → Generate new secret** — old URLs must return 401.
+4. **Push-to-deploy → Generate new secret** — the old secret must return 401, and the new secret is shown once.
+5. A plugin secret must not deploy a theme (and vice versa).

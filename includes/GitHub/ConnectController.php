@@ -114,6 +114,8 @@ class ConnectController {
 			$this->redirect_with_notice( 'error', __( 'Invalid or expired connection state. Please try again.', 'webba-deploy' ) );
 		}
 
+		delete_transient( $this->state_transient_key() );
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$installation_id = isset( $_GET['installation_id'] ) ? absint( $_GET['installation_id'] ) : 0;
 
@@ -127,7 +129,6 @@ class ConnectController {
 			$this->redirect_with_notice( 'error', $result->get_error_message() );
 		}
 
-		delete_transient( $this->state_transient_key() );
 		delete_transient( 'webba_deploy_repos_' . $installation_id );
 
 		$this->redirect_with_notice(
@@ -195,16 +196,22 @@ class ConnectController {
 		$token = $this->tokens->get_token( $installation_id );
 
 		if ( is_wp_error( $token ) ) {
+			$this->connection->disconnect();
+
 			return $token;
 		}
 
 		$repos = ( new RepositoryLister( $this->tokens, $this->api, $this->connection ) )->list_repositories();
 
 		if ( is_wp_error( $repos ) ) {
+			$this->connection->disconnect();
+
 			return $repos;
 		}
 
 		if ( empty( $repos ) ) {
+			$this->connection->disconnect();
+
 			return new \WP_Error(
 				'webba_deploy_no_repos',
 				__( 'Connected, but no repositories are available. Edit the GitHub App installation and grant access to at least one repository.', 'webba-deploy' )

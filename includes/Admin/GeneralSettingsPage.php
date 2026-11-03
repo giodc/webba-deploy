@@ -29,6 +29,10 @@ class GeneralSettingsPage {
 		$flush   = ! isset( $settings['flush_cache'] ) || ! empty( $settings['flush_cache'] );
 		$delete  = (bool) get_option( 'webba_deploy_delete_on_uninstall', false );
 
+		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
+		$auto_update  = in_array( 'webba-deploy/webba-deploy.php', $auto_updates, true );
+		$can_update   = Capability::can_deploy_any();
+
 		$this->render_notices();
 		?>
 		<div class="wrap webba-deploy">
@@ -61,6 +65,20 @@ class GeneralSettingsPage {
 							</label>
 						</td>
 					</tr>
+					<?php if ( $can_update ) : ?>
+						<tr>
+							<th scope="row"><?php echo esc_html__( 'Updates', 'webba-deploy' ); ?></th>
+							<td>
+								<label>
+									<input type="checkbox" name="auto_update" value="1" <?php checked( $auto_update ); ?> />
+									<?php echo esc_html__( 'Enable automatic updates for Webba Deploy from GitHub Releases.', 'webba-deploy' ); ?>
+								</label>
+								<p class="description">
+									<?php echo esc_html__( 'Off by default. Only enable this if you trust future releases published to this repository.', 'webba-deploy' ); ?>
+								</p>
+							</td>
+						</tr>
+					<?php endif; ?>
 					<tr>
 						<th scope="row"><?php echo esc_html__( 'Uninstall', 'webba-deploy' ); ?></th>
 						<td>

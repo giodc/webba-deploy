@@ -19,15 +19,27 @@ $webba_deploy_options = array(
 	'webba_deploy_github_app_credentials',
 	'webba_deploy_github',
 	'webba_deploy_site_secret',
+	'webba_deploy_site_secret_plugin',
+	'webba_deploy_site_secret_theme',
 	'webba_deploy_plugins',
 	'webba_deploy_themes',
 	'webba_deploy_settings',
 	'webba_deploy_logs',
 	'webba_deploy_delete_on_uninstall',
+	'webba_deploy_auto_update_default',
 );
 
 foreach ( $webba_deploy_options as $webba_deploy_option ) {
 	delete_option( $webba_deploy_option );
+}
+
+if ( ! is_multisite() || current_user_can( 'manage_network_plugins' ) ) {
+	$webba_deploy_auto_plugins = (array) get_site_option( 'auto_update_plugins', array() );
+	$webba_deploy_auto_plugins = array_values(
+		array_diff( $webba_deploy_auto_plugins, array( 'webba-deploy/webba-deploy.php' ) )
+	);
+
+	update_site_option( 'auto_update_plugins', $webba_deploy_auto_plugins );
 }
 
 global $wpdb;

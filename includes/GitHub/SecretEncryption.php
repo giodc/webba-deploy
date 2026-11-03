@@ -69,6 +69,18 @@ class SecretEncryption {
 	}
 
 	/**
+	 * Whether a payload uses the unauthenticated legacy format.
+	 *
+	 * Legacy payloads are only read so they can be migrated to v2 and should
+	 * never be written again.
+	 *
+	 * @param string $encoded Payload from the database.
+	 */
+	public static function is_legacy( string $encoded ): bool {
+		return '' !== $encoded && 0 !== strpos( $encoded, self::PREFIX );
+	}
+
+	/**
 	 * Verify the MAC and decrypt an authenticated payload.
 	 *
 	 * @param string $encoded Base64 body without the version prefix.

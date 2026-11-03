@@ -251,8 +251,8 @@ class PackageRepository {
 			'repo'        => $repo,
 			'branch'      => $branch,
 			'auth'        => $auth,
-			'auto_deploy' => false,
-			'webhook_id'  => null,
+			'auto_deploy' => ! empty( $data['auto_deploy'] ),
+			'webhook_id'  => isset( $data['webhook_id'] ) && is_numeric( $data['webhook_id'] ) ? (int) $data['webhook_id'] : null,
 			'last_deploy' => isset( $data['last_deploy'] ) && is_array( $data['last_deploy'] )
 				? $data['last_deploy']
 				: array(
@@ -316,5 +316,40 @@ class PackageRepository {
 			'owner' => $owner,
 			'repo'  => $repo,
 		);
+	}
+
+	/**
+	 * Whether a string is a valid Git branch name.
+	 *
+	 * @param string $branch Branch name.
+	 */
+	public static function is_valid_branch( string $branch ): bool {
+		if ( '' === $branch || strlen( $branch ) > 255 ) {
+			return false;
+		}
+
+		if ( ! preg_match( '/^[A-Za-z0-9._\/-]+$/', $branch ) ) {
+			return false;
+		}
+
+		foreach ( array( '..', '//', '@{' ) as $forbidden ) {
+			if ( false !== strpos( $branch, $forbidden ) ) {
+				return false;
+			}
+		}
+
+		foreach ( array( '-', '/', '.' ) as $forbidden_start ) {
+			if ( 0 === strpos( $branch, $forbidden_start ) ) {
+				return false;
+			}
+		}
+
+		foreach ( array( '/', '.' ) as $forbidden_end ) {
+			if ( substr( $branch, -strlen( $forbidden_end ) ) === $forbidden_end ) {
+				return false;
+			}
+		}
+
+		return '.lock' !== substr( $branch, -5 );
 	}
 }

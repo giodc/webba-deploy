@@ -66,6 +66,13 @@ class Capability {
 	}
 
 	/**
+	 * Whether the current user can deploy at least one package type.
+	 */
+	public static function can_deploy_any(): bool {
+		return self::can_deploy( 'plugin' ) || self::can_deploy( 'theme' );
+	}
+
+	/**
 	 * Die with 403 if user cannot deploy the given type.
 	 *
 	 * @param string $type Package type.
@@ -73,6 +80,15 @@ class Capability {
 	public static function require_deploy( string $type ): void {
 		if ( ! self::can_deploy( $type ) ) {
 			wp_die( esc_html__( 'You do not have permission to perform this deploy.', 'webba-deploy' ), 403 );
+		}
+	}
+
+	/**
+	 * Die with 403 if user cannot deploy any package type.
+	 */
+	public static function require_deploy_any(): void {
+		if ( ! self::can_deploy_any() ) {
+			wp_die( esc_html__( 'You do not have permission to manage deploy secrets.', 'webba-deploy' ), 403 );
 		}
 	}
 }
